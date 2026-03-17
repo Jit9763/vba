@@ -694,7 +694,7 @@
             btnSubmit.innerText = 'कृपया प्रतीक्षा करें... (Submitting)';
             btnSubmit.disabled = true;
 
-            fetch(scriptURL, { method: 'POST', body: new FormData(form) })
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: new FormData(form) })
                 .then(response => {
                     alert('डेटा सफलतापूर्वक सहेज लिया गया! (Data saved successfully!)');
                     btnSubmit.innerText = 'पूरा करें (Submit)';
