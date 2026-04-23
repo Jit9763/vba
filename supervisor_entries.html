@@ -84,15 +84,17 @@
 
         function loadLines() {
             renderDrawer(); // Add hamburger menu
-            const enumId = getFormState('selected_enumerator_id') || 'P001';
+            let enumId = getFormState('selected_enumerator_id') || 'e001';
+            enumId = enumId.toLowerCase() === 'e001' ? 'e001' : enumId;
             const mockData = getSupervisorMockData()[enumId];
             const select = document.getElementById('line-select');
+            select.innerHTML = '<option value="">चुना गया</option>'; // Reset options
             
-            if (mockData) {
+            if (mockData && mockData.records) {
                 mockData.records.forEach(r => {
                     const opt = document.createElement('option');
                     opt.value = r.id;
-                    opt.innerText = r.line;
+                    opt.innerText = r.line + " - " + (r.answers?.q11 || "N/A"); // Show name for clarity
                     select.appendChild(opt);
                 });
             }
@@ -100,16 +102,28 @@
 
         function fetchRecord() {
             const recId = document.getElementById('line-select').value;
-            if (!recId) return;
+            if (!recId) {
+                alert("कृपया पहले एक लाइन नंबर चुनें।");
+                return;
+            }
 
-            const enumId = getFormState('selected_enumerator_id') || 'P001';
+            let enumId = getFormState('selected_enumerator_id') || 'e001';
+            enumId = enumId.toLowerCase() === 'e001' ? 'e001' : enumId;
             const mockData = getSupervisorMockData()[enumId];
+            
+            if (!mockData || !mockData.records) {
+                alert("इस प्रगणक का कोई डेटा नहीं मिला।");
+                return;
+            }
+
             const rec = mockData.records.find(r => r.id === recId);
             
             if (rec) {
                 selectedRecord = rec;
-                document.getElementById('display-q1').innerText = rec.q1;
-                document.getElementById('display-q2').innerText = rec.answers?.q2 || 'N/A';
+                document.getElementById('display-q1').innerText = rec.q1 || (rec.answers && rec.answers.q1) || 'N/A';
+                document.getElementById('display-q2').innerText = rec.q2 || (rec.answers && rec.answers.q2) || 'N/A';
+            } else {
+                alert("डेटा लोड करने में त्रुटि।");
             }
         }
 
