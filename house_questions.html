@@ -61,7 +61,7 @@
     <script src="app.js"></script>
     <script>
         let currentIdx = 4;
-        const answers = {};
+        const answers = getFormState('answers') || {}; // FIX: Load existing answers (q1, q2, q3)
 
         const questions = {
             4: { section: "सामग्री विवरण", text: "4. जनगणना मकान के फर्श में प्रयुक्त प्रमुख सामग्री", type: "radio", options: ["1-मिट्टी", "2-लकड़ी/बांस", "3-पक्की ईंट", "4-पत्थर", "5-सीमेंट", "6-मोजेक/फर्श की टाइल", "7-अन्य कोई"] },

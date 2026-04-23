@@ -234,11 +234,38 @@ function getSupervisorMockData() {
             
             records = [...realSynced, ...realPending];
             
-            // If E001 has no work yet, give them 2 starter records for demo
+            // If E001 has no work yet, give them 15 FULLY FILLED starter records for demo
             if (records.length === 0) {
-                records = [
-                    { id: `LIVE-E001-1`, line: '001', q1: '1001', answers: { q1: '1001', q2: '0001', q9: '001', q11: 'राम सिंह' }, status: 'Pending' }
-                ];
+                const names = ["राम सिंह", "श्याम लाल", "सीता देवी", "मोहन कुमार", "राधा शर्मा", "गोपाल दास", "कमलेश मीणा", "सुनीता जैन", "रमेश चंद", "अनिता राठौड़", "दिनेश भार्गव", "रेखा कुमावत", "सुरेश चौधरी", "पूजा वर्मा", "कैलाश गुर्जर"];
+                
+                for(let i=1; i<=15; i++) {
+                    const lineNo = i.toString().padStart(3, '0');
+                    const bldgNo = (1000 + i).toString();
+                    const houseNo = i.toString().padStart(4, '0');
+                    
+                    records.push({
+                        id: `LIVE-E001-${i}`,
+                        line: lineNo,
+                        q1: bldgNo,
+                        q2: houseNo,
+                        status: 'Pending',
+                        answers: {
+                            q1: bldgNo, q2: houseNo, q3: houseNo,
+                            q4: "3-पक्की ईंट", q5: "8-पक्की ईंट", q6: "9-कंक्रीट",
+                            q7: "1-आवास", q8: "1-अच्छी", q9: lineNo,
+                            q10: (Math.floor(Math.random() * 5) + 3).toString(),
+                            q11: names[i-1], q12: "1-पुरुष", q13: "3-अन्य",
+                            q14: "1-अपना", q15: "3", q16: "1",
+                            q17: "1-नल का पानी उपचारित स्रोत से", q18: "1-परिसर के अन्दर",
+                            q19: "1-बिजली", q20: "1-केवल परिवार के लिए", q21: "1-पाईप सीवर पद्धति",
+                            q22: "1-पाइप सीवर", q23: "1-स्नानगृह", q24: "1-एलपीजी/पीएनजी गैस कनेक्शन उपलब्ध है",
+                            q25: "1-एलपीजी/पीएनजी", q26: "2-मोबाइल/स्मार्टफोन पर", q27: "3-केबल कनेक्शन",
+                            q28: "2-मोबाइल/स्मार्टफोन में", q29: "2-नहीं", q30: "2-स्मार्टफोन",
+                            q31: "2-स्कूटर/मोटर साईकिल/मोपेड", q32: "2-नहीं", q33: "1-गेहूँ",
+                            q34: "98765" + Math.floor(10000 + Math.random() * 90000)
+                        }
+                    });
+                }
             }
         } else {
             // MOCK DATA for others
