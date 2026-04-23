@@ -124,20 +124,26 @@
                 return;
             }
 
-            list.innerHTML = records.map((rec, index) => `
+            list.innerHTML = records.map((rec, index) => {
+                const buildingNo = rec.q1 || rec.answers?.q1 || 'N/A';
+                const houseNo = rec.q2 || rec.answers?.q2 || 'N/A';
+                const familyNo = rec.answers?.q9 || rec.q3 || houseNo; // Fallback to House No
+                const headName = rec.answers?.q11 || 'N/A';
+                
+                return `
                 <div class="record-card">
-                    <div class="record-line"><span class="record-label">लाइन क्रमांक::</span> ${rec.line || 'N/A'}</div>
-                    <div class="record-line"><span class="record-label">जनगणना मकान नंबर:</span> ${rec.answers?.q2 || 'N/A'}</div>
-                    <div class="record-line"><span class="record-label">भवन नम्बर:</span> ${rec.building_no || 'N/A'}</div>
-                    <div class="record-line"><span class="record-label">परिवार क्रमांक:</span> ${rec.answers?.q9 || 'N/A'}</div>
-                    <div class="record-line"><span class="record-label">परिवार के मुखिया का नाम:</span> ${rec.answers?.q11 || 'N/A'}</div>
+                    <div class="record-line"><span class="record-label">लाइन क्रमांक:</span> ${rec.line || (index+1).toString().padStart(3, '0')}</div>
+                    <div class="record-line"><span class="record-label">जनगणना मकान नंबर:</span> ${houseNo}</div>
+                    <div class="record-line"><span class="record-label">भवन नम्बर:</span> ${buildingNo}</div>
+                    <div class="record-line"><span class="record-label">परिवार क्रमांक:</span> ${familyNo}</div>
+                    <div class="record-line"><span class="record-label">परिवार के मुखिया का नाम:</span> ${headName}</div>
                     <div class="record-line"><span class="record-label">स्थिति:</span> <span class="status-synced">सिंक किया गया</span></div>
                     
                     <div class="edit-icon-btn" onclick="openModal(${index})">
-                        <i class="fas fa-pencil-alt"></i>
+                        <i class="fas fa-pencil-alt"></i> संपादित करें
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function openModal(index) {
@@ -152,9 +158,10 @@
         function confirmEdit(reason) {
             const records = getSyncedRecords();
             const record = records[selectedRecordIndex];
+            setFormState('editing_id', record.id); // Set ID for updating
             setFormState('edit_synced_index', selectedRecordIndex);
             setFormState('edit_reason', reason);
-            setFormState('answers', {}); 
+            setFormState('answers', record.answers || {}); 
             setFormState('line', record.line);
             setFormState('q2', record.answers?.q2);
             window.location.href = 'house_questions_edit.html';

@@ -79,6 +79,8 @@
         let lastRecord = null;
 
         window.onload = () => {
+            clearFormState(); // Ensure a clean slate for NEW entry
+            
             currentLine = getNextLineNumber();
             currentHouse = getNextHouseNumber();
             currentBuilding = getNextBuildingNumber();

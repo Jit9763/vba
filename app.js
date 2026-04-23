@@ -103,22 +103,36 @@ async function savePendingRecord(answers, editIndex = null) {
         const q1 = finalAnswers.q1 || getFormState('q1') || '0001';
         const q2 = finalAnswers.q2 || getFormState('q2') || '0001';
         const line = finalAnswers.line || getFormState('line') || '001';
+        
+        const editingId = getFormState('editing_id');
 
         const newRecord = {
-            id: 'REC-PEND-' + Date.now(),
+            id: editingId || ('REC-PEND-' + Date.now()),
             q1: q1, q2: q2, line: line,
             date: new Date().toLocaleDateString('hi-IN'),
             status: 'Pending',
             answers: finalAnswers
         };
 
-        if (editIndex !== null && records[editIndex]) {
-            records[editIndex].answers = finalAnswers;
-            records[editIndex].q1 = q1;
-            records[editIndex].q2 = q2;
-            records[editIndex].line = line;
+        // AGGRESSIVE DEDUPLICATION: Find by ID OR by (Building + House)
+        let existingIdx = records.findIndex(r => r.id === newRecord.id);
+        
+        // If not found by ID, check if this building + house already exists in pending
+        if (existingIdx === -1) {
+            existingIdx = records.findIndex(r => r.q1 === q1 && r.q2 === q2);
+        }
+
+        if (existingIdx !== -1) {
+            // Keep the old ID if we found it by Building+House to prevent fragmentation
+            if (records[existingIdx].id) newRecord.id = records[existingIdx].id;
+            records[existingIdx] = newRecord;
+            console.log("Success: Existing record updated");
+        } else if (editIndex !== null && records[editIndex]) {
+            records[editIndex] = newRecord;
+            console.log("Success: Record updated by index");
         } else {
             records.push(newRecord);
+            console.log("Success: New record added");
         }
 
         localStorage.setItem(storageKey, JSON.stringify(records));
@@ -126,8 +140,6 @@ async function savePendingRecord(answers, editIndex = null) {
         
         // Background sync
         syncToGoogleSheet([newRecord]);
-        
-        console.log("Success: Record saved locally");
         return true;
     } catch (e) {
         console.error("Save Error:", e);
@@ -190,8 +202,13 @@ function clearFormState() {
 }
 
 function logout() {
+    const user = getCurrentUser();
+    // Clear all session data and temporary synced/pending records for clean training start
+    localStorage.removeItem('census_synced_records_' + user.id);
+    localStorage.removeItem('census_pending_records_' + user.id);
     localStorage.removeItem('census_user_id');
     localStorage.removeItem('census_user_role');
+    localStorage.removeItem('census_form_state');
     window.location.href = 'index.html';
 }
 

@@ -142,20 +142,26 @@
                 return;
             }
 
-            list.innerHTML = all.map((rec, index) => `
+            list.innerHTML = all.map((rec, index) => {
+                const buildingNo = rec.q1 || rec.answers?.q1 || 'N/A';
+                const houseNo = rec.answers?.q2 || rec.house_no || 'N/A';
+                const familyNo = rec.answers?.q9 || rec.q3 || houseNo;
+                const headName = rec.answers?.q11 || 'N/A';
+                
+                return `
                 <div class="record-card">
-                    <div class="record-line"><span class="record-label">लाइन क्रमांक:</span> ${rec.line || 'N/A'}</div>
-                    <div class="record-line"><span class="record-label">जनगणना मकान नंबर:</span> ${rec.answers?.q2 || rec.house_no || 'N/A'}</div>
-                    <div class="record-line"><span class="record-label">भवन नम्बर:</span> ${rec.building_no || 'N/A'}</div>
-                    <div class="record-line"><span class="record-label">परिवार क्रमांक:</span> ${rec.answers?.q9 || 'N/A'}</div>
-                    <div class="record-line"><span class="record-label">परिवार के मुखिया का नाम:</span> ${rec.answers?.q11 || 'N/A'}</div>
+                    <div class="record-line"><span class="record-label">लाइन क्रमांक:</span> ${rec.line || (index+1).toString().padStart(3, '0')}</div>
+                    <div class="record-line"><span class="record-label">जनगणना मकान नंबर:</span> ${houseNo}</div>
+                    <div class="record-line"><span class="record-label">भवन नम्बर:</span> ${buildingNo}</div>
+                    <div class="record-line"><span class="record-label">परिवार क्रमांक:</span> ${familyNo}</div>
+                    <div class="record-line"><span class="record-label">परिवार के मुखिया का नाम:</span> ${headName}</div>
                     <div class="record-line"><span class="record-label">स्थिति:</span> ${rec.status === 'synced' ? '<span style="color:#2ecc71;">लॉक किया गया और सिंक किया गया</span>' : 'लॉक किया गया'}</div>
                     
                     <div class="view-icon-btn" onclick="viewDetails(${index})">
-                        <i class="fas fa-eye"></i>
+                        <i class="fas fa-eye"></i> विवरण देखें
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function viewDetails(index) {

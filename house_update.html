@@ -72,7 +72,8 @@
     <script src="app.js"></script>
     <script>
         function loadPendingRecords() {
-            const allRecords = getAllRecords();
+            // ONLY SHOW PENDING RECORDS HERE for a clean start after sync
+            const allRecords = getPendingRecords();
             const list = document.getElementById('records-list');
             
             if (allRecords.length === 0) {
@@ -83,6 +84,7 @@
             list.innerHTML = allRecords.map(rec => {
                 const buildingNo = rec.q1 || (rec.answers ? rec.answers.q1 : 'N/A');
                 const houseNo = rec.q2 || (rec.answers ? rec.answers.q2 : 'N/A');
+                const familyNo = rec.answers?.q9 || rec.q3 || houseNo;
                 const name = rec.answers ? rec.answers.q11 : 'N/A';
                 const isPending = rec.status === 'Pending';
                 
@@ -91,6 +93,7 @@
                     <div class="record-line"><span class="record-label">लाइन क्रमांक:</span> ${rec.line || 'N/A'}</div>
                     <div class="record-line"><span class="record-label">भवन नम्बर:</span> ${buildingNo}</div>
                     <div class="record-line"><span class="record-label">जनगणना मकान नंबर:</span> ${houseNo}</div>
+                    <div class="record-line"><span class="record-label">परिवार क्रमांक:</span> ${familyNo}</div>
                     <div class="record-line"><span class="record-label">परिवार के मुखिया का नाम:</span> ${name}</div>
                     <div class="record-line"><span class="record-label">स्थिति:</span> ${isPending ? '<span style="color:orange; font-weight:bold;">पेंडिंग (नया डेटा)</span>' : '<span style="color:green">सिंक किया गया</span>'}</div>
                     
@@ -104,6 +107,7 @@
         function editAnyRecord(id) {
             const record = getAllRecords().find(r => r.id === id);
             if (record) {
+                setFormState('editing_id', record.id); // Set ID for updating
                 setFormState('answers', record.answers);
                 setFormState('q1', record.q1 || record.answers?.q1);
                 setFormState('q2', record.q2 || record.answers?.q2);
@@ -146,8 +150,21 @@
         function editRecord(index) {
             const records = getPendingRecords();
             const record = records[index];
+            setFormState('editing_id', record.id);
             setFormState('edit_pending_index', index);
             setFormState('answers', record.answers);
+            setFormState('line', record.line);
+            setFormState('q2', record.answers?.q2);
+            window.location.href = 'house_questions_edit.html';
+        }
+
+        function confirmEdit(reason) {
+            const records = getSyncedRecords();
+            const record = records[selectedRecordIndex];
+            setFormState('editing_id', record.id); // Set ID for updating
+            setFormState('edit_synced_index', selectedRecordIndex);
+            setFormState('edit_reason', reason);
+            setFormState('answers', record.answers || {}); 
             setFormState('line', record.line);
             setFormState('q2', record.answers?.q2);
             window.location.href = 'house_questions_edit.html';
