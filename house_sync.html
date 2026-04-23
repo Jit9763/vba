@@ -165,18 +165,20 @@
                 progress.style.width = '100%';
                 statusText.innerText = "सिंक सफलतापूर्वक पूरा हुआ!";
                 
-                // CLEAR PENDING RECORDS after sync
+                // 1. Move pending records to the locally synced list for summary display
+                const currentSynced = getSyncedRecords();
+                const updatedSynced = [...currentSynced, ...pendingRecords];
+                localStorage.setItem('census_synced_records_' + user.id, JSON.stringify(updatedSynced));
+                
+                // 2. CLEAR PENDING RECORDS after sync
                 for (let i = localStorage.length - 1; i >= 0; i--) {
                     const key = localStorage.key(i);
                     if (key && key.includes('pending_records')) {
                         localStorage.removeItem(key);
                     }
                 }
-                
-                // Also clear temporary synced records for this device
-                localStorage.removeItem('census_synced_records_' + user.id);
 
-                alert(allToSync.length + " रिकॉर्ड सफलतापूर्वक गूगल शीट में सिंक कर दिए गए हैं। अब आपका स्थानीय डेटा साफ़ कर दिया गया है।");
+                alert(allToSync.length + " रिकॉर्ड सफलतापूर्वक गूगल शीट में सिंक कर दिए गए हैं और समरी अपडेट कर दी गई है।");
                 window.location.href = 'dashboard.html';
             } catch (error) {
                 console.error("Sync error:", error);
