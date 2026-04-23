@@ -50,7 +50,7 @@
     <div class="app-container" style="background-color: #f5f5f5;">
         <div class="header" style="background-color: #f2994a; height: 70px;">
             <div class="header-left">
-                <a href="dashboard.html" class="icon-btn" style="font-size: 24px;">←</a>
+                <span class="icon-btn" onclick="toggleDrawer()" style="font-size: 24px; margin-left: 15px;">☰</span>
                 <span style="font-size: 18px; font-weight: 500; margin-left: 15px;">एचएलओ ऐप</span>
             </div>
             <div class="header-right">
@@ -84,6 +84,7 @@
 
     <script src="app.js"></script>
     <script>
+        renderDrawer(); // Add hamburger menu
         const canvas = document.getElementById('sig-canvas');
         const ctx = canvas.getContext('2d');
         let drawing = false;

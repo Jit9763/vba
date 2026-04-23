@@ -13,9 +13,10 @@
         .rev-a { font-size: 13px; color: #333; }
         
         .rev-footer {
-            position: fixed; bottom: 0; left: 0; right: 0; background: white;
+            position: fixed; bottom: 0; background: white;
             display: flex; padding: 15px; gap: 15px; border-top: 1px solid #eee;
             box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+            width: 100%; max-width: 420px; box-sizing: border-box;
         }
         .btn-ok { background: #f2994a; color: white; border: none; border-radius: 25px; padding: 12px; flex: 1; font-weight: bold; }
         .btn-remark { background: #f2994a; color: white; border: none; border-radius: 25px; padding: 12px; flex: 1; font-weight: bold; }
@@ -34,7 +35,7 @@
     <div class="app-container" style="background: white;">
         <div class="header" style="background-color: #f2994a; height: 75px;">
             <div class="header-left">
-                <a href="supervisor_entries.html" class="icon-btn" style="font-size: 24px;">←</a>
+                <span class="icon-btn" onclick="toggleDrawer()" style="font-size: 24px; color: white; margin-left: 15px;">☰</span>
                 <span style="font-size: 20px; font-weight: 500; margin-left: 15px;">एचएलओ ऐप</span>
             </div>
             <div class="header-right">
@@ -91,6 +92,7 @@
         };
 
         function loadReview() {
+            renderDrawer(); // Add hamburger menu
             const answers = getFormState('answers') || {};
             const list = document.getElementById('review-list');
             list.innerHTML = '';

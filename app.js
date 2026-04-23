@@ -223,10 +223,15 @@ function getSupervisorMockData() {
         // Start with empty records
         let records = [];
 
-        if (id === 'e001') {
+        if (id.toLowerCase() === 'e001') {
             // LIVE DATA: Fetch actual records saved by E001 (synced ones)
-            const realSynced = JSON.parse(localStorage.getItem('census_synced_records_e001') || '[]');
-            const realPending = JSON.parse(localStorage.getItem('census_pending_records_e001') || '[]');
+            // Check both lowercase and uppercase keys to be safe
+            let realSynced = JSON.parse(localStorage.getItem('census_synced_records_e001') || 'null');
+            if (!realSynced) realSynced = JSON.parse(localStorage.getItem('census_synced_records_E001') || '[]');
+            
+            let realPending = JSON.parse(localStorage.getItem('census_pending_records_e001') || 'null');
+            if (!realPending) realPending = JSON.parse(localStorage.getItem('census_pending_records_E001') || '[]');
+            
             records = [...realSynced, ...realPending];
             
             // If E001 has no work yet, give them 2 starter records for demo
@@ -244,6 +249,7 @@ function getSupervisorMockData() {
             if (idx % 2 === 0) {
                 records.push({ id: `MOCK-${id}-3`, line: '003', q1: '0102', answers: { q1: '0102', q2: '0003', q9: '003', q11: 'हरीश चन्द्र' }, status: 'Pending' });
             }
+        }
         data[id] = {
             name: names[idx],
             records: records
@@ -257,15 +263,19 @@ function getSupervisorMockData() {
  */
 function updateSupervisorRecord(enumId, recId, newStatus, remark = '') {
     // If it's the real E001, update their local storage directly
-    if (enumId === 'e001') {
-        const storageKey = 'census_synced_records_e001';
-        let records = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        const idx = records.findIndex(r => r.id === recId);
-        if (idx !== -1) {
-            records[idx].status = newStatus;
-            records[idx].supervisor_remark = remark;
-            localStorage.setItem(storageKey, JSON.stringify(records));
-        }
+    if (enumId.toLowerCase() === 'e001') {
+        const storageKeys = ['census_synced_records_e001', 'census_synced_records_E001'];
+        storageKeys.forEach(storageKey => {
+            let records = JSON.parse(localStorage.getItem(storageKey) || 'null');
+            if (records) {
+                const idx = records.findIndex(r => r.id === recId);
+                if (idx !== -1) {
+                    records[idx].status = newStatus;
+                    records[idx].supervisor_remark = remark;
+                    localStorage.setItem(storageKey, JSON.stringify(records));
+                }
+            }
+        });
     }
     // For mock records, we just simulate success
     console.log(`Supervisor Action: ${newStatus} on ${recId} for ${enumId}. Remark: ${remark}`);
@@ -278,4 +288,46 @@ function showAbout() {
 
 function showMap() {
     window.open('hlb_map.png', '_blank');
+}
+
+/**
+ * UI HELPER: Centralized Navigation Drawer
+ */
+function toggleDrawer() {
+    const drawer = document.getElementById('nav-drawer');
+    const overlay = document.getElementById('drawer-overlay');
+    if (drawer.classList.contains('open')) {
+        drawer.classList.remove('open');
+        overlay.style.display = 'none';
+    } else {
+        drawer.classList.add('open');
+        overlay.style.display = 'block';
+    }
+}
+
+function renderDrawer() {
+    const user = getCurrentUser();
+    const drawerHtml = `
+        <div id="drawer-overlay" class="drawer-overlay" onclick="toggleDrawer()"></div>
+        <div id="nav-drawer">
+            <div class="drawer-header-new">
+                <div class="user-profile">
+                    <div class="user-icon"><i class="fas fa-user"></i></div>
+                    <div class="user-info">
+                        <div class="user-id">${user.id}</div>
+                        <div class="user-role">Role: <br><span style="font-size: 9px;">${(user.role || 'enumerator').toUpperCase()}</span></div>
+                    </div>
+                </div>
+                <div class="drawer-stats">SE आईडी डाउनलोड हुई: 0</div>
+            </div>
+            <div class="drawer-menu">
+                <a href="javascript:void(0)" class="drawer-item-new" onclick="showAbout()"><i class="fas fa-info-circle"></i><span>बारे में</span></a>
+                <a href="password.html" class="drawer-item-new"><i class="fas fa-ellipsis-h"></i><span>पासवर्ड बदलें</span></a>
+                <a href="javascript:void(0)" class="drawer-item-new" onclick="showMap()"><i class="fas fa-book-open"></i><span>एचएलबी मानचित्र</span></a>
+                <a href="#" class="drawer-item-new"><i class="fas fa-question-circle"></i><span>सहायता</span></a>
+                <a href="index.html" class="drawer-item-new" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>लॉग-आउट</span></a>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('afterbegin', drawerHtml);
 }

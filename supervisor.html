@@ -34,7 +34,7 @@
     <div class="app-container" style="background: white;">
         <div class="header" style="background-color: #f2994a; height: 75px;">
             <div class="header-left">
-                <span style="font-size: 24px; color: white; margin-left: 15px;">☰</span>
+                <span class="icon-btn" onclick="toggleDrawer()" style="font-size: 24px; color: white; margin-left: 15px;">☰</span>
                 <span style="font-size: 20px; font-weight: 500; margin-left: 15px;">एचएलओ ऐप</span>
             </div>
             <div class="header-right">
@@ -70,6 +70,7 @@
     <script src="app.js"></script>
     <script>
         function loadEnums() {
+            renderDrawer(); // Add hamburger menu
             const mockData = getSupervisorMockData();
             const select = document.getElementById('enumerator-select');
             Object.keys(mockData).forEach(id => {

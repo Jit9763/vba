@@ -63,55 +63,9 @@
         </div>
     </div>
 
-    <!-- Drawer Overlay -->
-    <div id="drawer-overlay" class="drawer-overlay" onclick="toggleDrawer()"></div>
-
-    <!-- Navigation Drawer -->
-    <div id="nav-drawer">
-        <div class="drawer-header-new">
-            <div class="user-profile">
-                <div class="user-icon">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="user-info">
-                    <div class="user-id">et_99020017007_nidhi</div>
-                    <div class="user-role">
-                        Role: <br>
-                        <span style="font-size: 9px;">STATUTORY_TOWN_CHARGE_ENUMERATOR</span>
-                    </div>
-                </div>
-            </div>
-            <div class="drawer-stats">
-                SE आईडी डाउनलोड हुई: 0
-            </div>
-        </div>
-        
-        <div class="drawer-menu">
-            <a href="javascript:void(0)" class="drawer-item-new" onclick="showAbout()">
-                <i class="fas fa-info-circle"></i>
-                <span>ऐप के बारे में में</span>
-            </a>
-            <a href="password.html" class="drawer-item-new">
-                <i class="fas fa-ellipsis-h"></i>
-                <span>पासवर्ड परिवर्तन</span>
-            </a>
-            <a href="javascript:void(0)" class="drawer-item-new" onclick="showMap()">
-                <i class="fas fa-book-open"></i>
-                <span>एचएलबी मानचित्र</span>
-            </a>
-            <a href="#" class="drawer-item-new">
-                <i class="fas fa-question-circle"></i>
-                <span>सहायता केंद्र</span>
-            </a>
-            <a href="index.html" class="drawer-item-new" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>लॉग आउट</span>
-            </a>
-        </div>
-    </div>
-
     <script src="app.js"></script>
     <script>
+        renderDrawer(); // Add hamburger menu
         function saveLocationData() {
             const buildings = document.getElementById('expected-buildings').value;
             const houses = document.getElementById('expected-houses').value;

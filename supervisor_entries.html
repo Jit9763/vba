@@ -37,7 +37,7 @@
     <div class="app-container" style="background: white;">
         <div class="header" style="background-color: #f2994a; height: 75px;">
             <div class="header-left">
-                <a href="supervisor_location.html" class="icon-btn" style="font-size: 24px;">←</a>
+                <span class="icon-btn" onclick="toggleDrawer()" style="font-size: 24px; color: white; margin-left: 15px;">☰</span>
                 <span style="font-size: 20px; font-weight: 500; margin-left: 15px;">एचएलओ ऐप</span>
             </div>
             <div class="header-right">
@@ -89,6 +89,7 @@
         let selectedRecord = null;
 
         function loadLines() {
+            renderDrawer(); // Add hamburger menu
             const enumId = getFormState('selected_enumerator_id') || 'P001';
             const mockData = getSupervisorMockData()[enumId];
             const select = document.getElementById('line-select');
