@@ -122,6 +122,7 @@
             setFormState('answers', selectedRecord.answers);
             setFormState('line', selectedRecord.line);
             setFormState('q2', selectedRecord.answers?.q2);
+            setFormState('selected_record_id', selectedRecord.id); // FIX: Send the record ID
             window.location.href = 'supervisor_review.html';
         }
 
