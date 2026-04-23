@@ -3,90 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HLO Portal - Supervisor</title>
+    <title>HLO Portal - पयवेक होम पेज</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .sup-container { padding: 20px; }
+        .sup-header-pill {
+            background: #f2994a; color: white; padding: 12px; border-radius: 25px;
+            text-align: center; font-weight: bold; font-size: 15px; margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(242, 153, 74, 0.3);
+        }
+        .sup-label { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 10px; display: block; text-align: center; }
+        .sup-select {
+            width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #ccc;
+            font-size: 16px; background: white; margin-bottom: 40px;
+        }
+        .sup-btn-orange {
+            background: #f2994a; color: white; border: none; border-radius: 10px;
+            padding: 15px; width: 100%; font-size: 14px; font-weight: bold; cursor: pointer;
+            margin-bottom: 15px;
+        }
+        .sup-btn-outline {
+            background: white; color: #333; border: 1px solid #ddd; border-radius: 10px;
+            padding: 15px; width: 100%; font-size: 14px; font-weight: bold; cursor: pointer;
+            text-align: center; display: block; text-decoration: none;
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="header">
+    <div class="app-container" style="background: white;">
+        <div class="header" style="background-color: #f2994a; height: 75px;">
             <div class="header-left">
-                <a href="dashboard.html" class="icon-btn">←</a>
-                <span>Paryavekshak Portal</span>
+                <span style="font-size: 24px; color: white; margin-left: 15px;">☰</span>
+                <span style="font-size: 20px; font-weight: 500; margin-left: 15px;">एचएलओ ऐप</span>
             </div>
-        </div>
-        
-        <div style="padding: 20px;">
-            <h4>प्रगणक कार्य समीक्षा (Review)</h4>
-            <div id="pending-list" style="background: white; border: 1px solid #eee; border-radius: 8px; overflow: hidden;">
-                <!-- List will be populated via JS -->
-                <div style="padding: 20px; text-align: center; color: #999;">कोई लंबित डेटा नहीं है।</div>
+            <div class="header-right">
+                <div style="display:flex; gap: 15px; color: white; font-size: 18px; margin-right: 15px;">
+                    <i class="fas fa-signal"></i>
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-three-quarters"></i>
+                    <span>44%</span>
+                </div>
             </div>
         </div>
 
-        <!-- Modal for detail -->
-        <div id="modal-container" class="modal">
-            <div class="modal-content">
-                <h3 id="modal-title">Review Data</h3>
-                <p id="modal-body" style="margin: 15px 0; color: var(--text-gray); white-space: pre-wrap; font-size: 12px;"></p>
-                <div id="modal-progress" style="display:none; width: 100%; height: 8px; background: #eee; border-radius: 5px; overflow: hidden; margin: 15px 0;">
-                    <div id="modal-progress-bar" style="width: 0%; height: 100%; background: var(--primary-orange); transition: width 0.1s;"></div>
-                </div>
-                <button class="nav-btn nav-btn-primary" style="width: 100%;" onclick="approveAndSync()">स्वीकृत करें और सिंक करें</button>
-                <button class="nav-btn" style="width: 100%; margin-top: 10px;" onclick="closeModal()">रद्द करें</button>
-            </div>
+        <div class="sup-container">
+            <div class="sup-header-pill">प्रगणक और एचएलबी सूची</div>
+            
+            <label class="sup-label">प्रगणक का नाम चुनें</label>
+            <select id="enumerator-select" class="sup-select">
+                <option value="">गणनाकर्ता चुनें</option>
+                <!-- Will be populated from app.js -->
+            </select>
+
+            <button class="sup-btn-orange" onclick="getHLBDetails()">एचएलबी विवरण प्राप्त करें</button>
+            
+            <a href="dashboard.html" class="sup-btn-outline">बाहर निकलें</a>
+        </div>
+
+        <div style="position: absolute; bottom: 40px; width: 100%; text-align: center; color: #888; font-size: 12px;">
+            भारत के महारजिस्ट्रार एवं जनगणना आयुक्त का कार्यालय<br>
+            द्वारा डिजाइन और विकसित
         </div>
     </div>
 
     <script src="app.js"></script>
     <script>
-        const pending = getPendingRecords();
-        const listContainer = document.getElementById('pending-list');
-
-        if (pending.length > 0) {
-            listContainer.innerHTML = '';
-            pending.forEach((rec, idx) => {
-                const item = document.createElement('div');
-                item.className = 'drawer-item';
-                item.style.display = 'flex';
-                item.style.justifyContent = 'space-between';
-                item.innerHTML = `<span>👤 Record #${idx+1} (${rec.q10 || 'Unknown Head'})</span><span style="color:var(--primary-orange)">Review →</span>`;
-                item.onclick = () => showDetail(idx);
-                listContainer.appendChild(item);
+        function loadEnums() {
+            const mockData = getSupervisorMockData();
+            const select = document.getElementById('enumerator-select');
+            Object.keys(mockData).forEach(id => {
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.innerText = mockData[id].name + " (" + id + ")";
+                select.appendChild(opt);
             });
         }
 
-        let activeIdx = -1;
-        function showDetail(idx) {
-            activeIdx = idx;
-            const rec = pending[idx];
-            document.getElementById('modal-title').innerText = "Record review: " + (rec.q10 || "N/A");
-            document.getElementById('modal-body').innerText = JSON.stringify(rec, null, 2).substring(0, 500) + "...";
-            document.getElementById('modal-container').style.display = 'flex';
+        function getHLBDetails() {
+            const enumId = document.getElementById('enumerator-select').value;
+            if (!enumId) {
+                alert("कृपया एक प्रगणक चुनें");
+                return;
+            }
+            setFormState('selected_enumerator_id', enumId);
+            window.location.href = 'supervisor_location.html';
         }
 
-        function closeModal() {
-            document.getElementById('modal-container').style.display = 'none';
-        }
-
-        function approveAndSync() {
-            const progress = document.getElementById('modal-progress');
-            const bar = document.getElementById('modal-progress-bar');
-            
-            progress.style.display = 'block';
-            
-            // Simulation of fetch
-            let x = 0;
-            const interval = setInterval(() => {
-                x += 10;
-                bar.style.width = x + '%';
-                if(x >= 100) {
-                    clearInterval(interval);
-                    clearPendingRecords(); // Clear all for simulation
-                    alert("डेटा सफलतापूर्वक Google Sheets में भेजा गया!");
-                    window.location.href = 'dashboard.html';
-                }
-            }, 100);
-        }
+        window.onload = loadEnums;
     </script>
 </body>
 </html>

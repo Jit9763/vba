@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - पयवेक - समीा</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .rev-container { padding: 15px; flex: 1; overflow-y: auto; padding-bottom: 100px; }
+        .rev-item { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .rev-q { font-size: 11px; color: #666; font-weight: bold; margin-bottom: 3px; }
+        .rev-a { font-size: 13px; color: #333; }
+        
+        .rev-footer {
+            position: fixed; bottom: 0; left: 0; right: 0; background: white;
+            display: flex; padding: 15px; gap: 15px; border-top: 1px solid #eee;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+        }
+        .btn-ok { background: #f2994a; color: white; border: none; border-radius: 25px; padding: 12px; flex: 1; font-weight: bold; }
+        .btn-remark { background: #f2994a; color: white; border: none; border-radius: 25px; padding: 12px; flex: 1; font-weight: bold; }
+
+        /* Remark Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: #fff; width: 85%; border-radius: 12px; overflow: hidden; }
+        .modal-header { background: #f2994a; color: white; padding: 15px; text-align: center; font-weight: bold; }
+        .modal-body { padding: 20px; }
+        .remark-area { width: 100%; height: 100px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; font-family: inherit; }
+        .modal-footer { display: flex; padding: 15px; gap: 10px; }
+        .btn-modal { padding: 10px; border-radius: 8px; border: none; flex: 1; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="app-container" style="background: white;">
+        <div class="header" style="background-color: #f2994a; height: 75px;">
+            <div class="header-left">
+                <a href="supervisor_entries.html" class="icon-btn" style="font-size: 24px;">←</a>
+                <span style="font-size: 20px; font-weight: 500; margin-left: 15px;">एचएलओ ऐप</span>
+            </div>
+            <div class="header-right">
+                <div style="display:flex; gap: 15px; color: white; font-size: 18px; margin-right: 15px;">
+                    <i class="fas fa-signal"></i>
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-three-quarters"></i>
+                    <span>44%</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #eee; padding: 10px; font-size: 14px; font-weight: bold; text-align: center;">उत्तर समीक्षा</div>
+
+        <div class="rev-container" id="review-list">
+            <!-- 34 questions will be shown here -->
+        </div>
+
+        <div class="rev-footer">
+            <button class="btn-ok" onclick="approveRecord()">ठीक है</button>
+            <button class="btn-remark" onclick="showRemarkModal()">टिप्पणी</button>
+        </div>
+    </div>
+
+    <!-- Remark Modal -->
+    <div id="remark-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">टिप्पणी</div>
+            <div class="modal-body">
+                <p style="font-size: 11px; color: #666; margin-bottom: 10px;">कृपया सभी फ़ील्ड्स में टिप्पणियाँ भरें। प्रत्येक परिवार के लिए टिप्पणियाँ केवल एक बार जोड़ी जा सकती हैं।</p>
+                <textarea id="remark-text" class="remark-area" placeholder="यहाँ टिप्पणी लिखें..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal" style="background:#eee;" onclick="closeModal()">रद्द करें</button>
+                <button class="btn-modal" style="background:#f2994a; color:white;" onclick="submitRemark()">सबमिट करें</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        const questions = {
+            1: "क्रम संख्या", 2: "भवन नम्बर", 3: "जनगणना मकान नम्बर",
+            4: "फर्श सामग्री", 5: "दीवार सामग्री", 6: "छत सामग्री",
+            7: "मकान का उपयोग", 8: "मकान की स्थिति", 9: "परिवार क्रमांक",
+            10: "कुल व्यक्ति", 11: "मुखिया का नाम", 12: "लिंग",
+            13: "जाति (SC/ST/अन्य)", 14: "स्वामित्व", 15: "कमरों की संख्या",
+            16: "दंपत्तियों की संख्या", 17: "पेयजल स्रोत", 18: "स्रोत की उपलब्धता",
+            19: "प्रकाश का स्रोत", 20: "शौचालय सुलभता", 21: "शौचालय का प्रकार",
+            22: "गंदे पानी की निकासी", 23: "स्नान सुविधा", 24: "रसोई और गैस",
+            25: "मुख्य ईंधन", 26: "रेडियो/ट्रांजिस्टर", 27: "टेलीविजन",
+            28: "इंटरनेट सुविधा", 29: "लैपटॉप/कम्प्यूटर", 30: "टेलीफोन/स्मार्टफोन",
+            31: "वाहन", 32: "कार/जीप/वैन", 33: "मुख्य अनाज", 34: "मोबाइल नम्बर"
+        };
+
+        function loadReview() {
+            const answers = getFormState('answers') || {};
+            const list = document.getElementById('review-list');
+            list.innerHTML = '';
+
+            for (let i = 1; i <= 34; i++) {
+                const item = document.createElement('div');
+                item.className = 'rev-item';
+                item.innerHTML = `
+                    <div class="rev-q">${i}. ${questions[i]}:</div>
+                    <div class="rev-a">${answers['q' + i] || '---'}</div>
+                `;
+                list.appendChild(item);
+            }
+        }
+
+        function showRemarkModal() { document.getElementById('remark-modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('remark-modal').style.display = 'none'; }
+        
+        function approveRecord() {
+            const enumId = getFormState('selected_enumerator_id') || 'e001';
+            const recId = getFormState('selected_record_id');
+            updateSupervisorRecord(enumId, recId, 'Approved');
+            alert("रिकॉर्ड सफलतापूर्वक स्वीकृत (Approved) कर लिया गया है।");
+            window.location.href = 'supervisor_entries.html';
+        }
+
+        function submitRemark() {
+            const text = document.getElementById('remark-text').value;
+            if (!text) { alert("कृपया टिप्पणी दर्ज करें"); return; }
+            const enumId = getFormState('selected_enumerator_id') || 'e001';
+            const recId = getFormState('selected_record_id');
+            updateSupervisorRecord(enumId, recId, 'Rejected', text);
+            alert("टिप्पणी सुरक्षित कर ली गई है और प्रगणक को भेज दी गई है।");
+            closeModal();
+            window.location.href = 'supervisor_entries.html';
+        }
+
+        window.onload = loadReview;
+    </script>
+</body>
+</html>

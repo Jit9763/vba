@@ -133,16 +133,29 @@
     <script src="app.js"></script>
     <script>
         const user = getCurrentUser();
-        document.getElementById('display-role').innerText = (user.role || 'enumerator').toUpperCase();
-        document.getElementById('display-id').innerText = user.id;
         
+        // Show Supervisor-only sections
         if (user.role === 'supervisor') {
-            document.getElementById('supervisor-link').style.display = 'block';
+            const grid = document.querySelector('.dashboard-grid');
+            const supervisorCard = `
+                <a href="supervisor.html" class="menu-card" style="border: 2px solid #9b59b6; grid-column: span 2;">
+                    <div class="icon-circle" style="background-color: #f3e5f5; color: #9b59b6; width: 60px; height: 60px;">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div style="text-align: left; flex: 1; margin-left: 15px;">
+                        <span class="menu-label" style="font-size: 16px; font-weight: bold;">प्रगणक कार्य समीक्षा (Review)</span>
+                        <p style="font-size: 11px; color: #666; margin-top: 5px;">6 प्रगणकों का डेटा समीक्षा के लिए उपलब्ध है</p>
+                    </div>
+                </a>
+            `;
+            grid.insertAdjacentHTML('afterbegin', supervisorCard);
         }
 
-        // Set counts
-        document.getElementById('dash-buildings').innerText = localStorage.getItem('census_expected_buildings') || '0';
-        document.getElementById('dash-houses').innerText = localStorage.getItem('census_expected_houses') || '0';
+        // Set User Details in Drawer
+        try {
+            document.querySelector('.user-id').innerText = user.id;
+            document.querySelector('.user-role').innerHTML = `Role: <br><span style="font-size: 9px;">${(user.role || 'enumerator').toUpperCase()}</span>`;
+        } catch(e) {}
     </script>
 </body>
 </html>

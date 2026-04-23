@@ -203,13 +203,67 @@ function clearFormState() {
 
 function logout() {
     const user = getCurrentUser();
-    // Clear all session data and temporary synced/pending records for clean training start
     localStorage.removeItem('census_synced_records_' + user.id);
     localStorage.removeItem('census_pending_records_' + user.id);
     localStorage.removeItem('census_user_id');
     localStorage.removeItem('census_user_role');
     localStorage.removeItem('census_form_state');
     window.location.href = 'index.html';
+}
+
+/**
+ * DYNAMIC SUPERVISOR DATA: Merges real E001 work with 5 other mock enumerators
+ */
+function getSupervisorMockData() {
+    const enumIds = ['e001', 'P002', 'P003', 'P004', 'P005', 'P006'];
+    const names = ["जितेंद्र (E001)", "सुनीता शर्मा", "राजेश मीना", "गीता देवी", "विजय सिंह", "संजू वर्मा"];
+    const data = {};
+
+    enumIds.forEach((id, idx) => {
+        // Start with empty records
+        let records = [];
+
+        if (id === 'e001') {
+            // LIVE DATA: Fetch actual records saved by E001 (synced ones)
+            const realSynced = JSON.parse(localStorage.getItem('census_synced_records_e001') || '[]');
+            const realPending = JSON.parse(localStorage.getItem('census_pending_records_e001') || '[]');
+            records = [...realSynced, ...realPending];
+            
+            // If E001 has no work yet, give them 2 starter records for demo
+            if (records.length === 0) {
+                records = [
+                    { id: `LIVE-E001-1`, line: '001', q1: '1001', answers: { q1: '1001', q2: '0001', q9: '001', q11: 'राम सिंह' }, status: 'Pending' }
+                ];
+            }
+        } else {
+            // MOCK DATA for others
+            records = [
+                { id: `MOCK-${id}-1`, line: '001', q1: '0101', answers: { q1: '0101', q2: '0001', q9: '001', q11: 'रामेश्वर लाल' }, status: 'Pending' },
+                { id: `MOCK-${id}-2`, line: '002', q1: '0101', answers: { q1: '0101', q2: '0002', q9: '002', q11: 'कमला बाई' }, status: 'Pending' }
+            ];
+            if (idx % 2 === 0) {
+                records.push({ id: `MOCK-${id}-3`, line: '003', q1: '0102', answers: { q1: '0102', q2: '0003', q9: '003', q11: 'हरीश चन्द्र' }, status: 'Pending' });
+            }
+        }
+
+/**
+ * SUPERVISOR ACTIONS: Approve or Reject (Remark) a record
+ */
+function updateSupervisorRecord(enumId, recId, newStatus, remark = '') {
+    // If it's the real E001, update their local storage directly
+    if (enumId === 'e001') {
+        const storageKey = 'census_synced_records_e001';
+        let records = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        const idx = records.findIndex(r => r.id === recId);
+        if (idx !== -1) {
+            records[idx].status = newStatus;
+            records[idx].supervisor_remark = remark;
+            localStorage.setItem(storageKey, JSON.stringify(records));
+        }
+    }
+    // For mock records, we just simulate success
+    console.log(`Supervisor Action: ${newStatus} on ${recId} for ${enumId}. Remark: ${remark}`);
+    return true;
 }
 
 function showAbout() {

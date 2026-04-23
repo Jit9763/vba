@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - पयवेक - िवियाँ दखे ना</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .ent-container { padding: 15px; }
+        .ent-header-pill {
+            background: #f2994a; color: white; padding: 10px; border-radius: 20px;
+            text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(242, 153, 74, 0.2);
+        }
+        .ent-label { font-size: 13px; font-weight: bold; color: #333; margin-bottom: 8px; display: block; }
+        .ent-select-row { display: flex; gap: 10px; align-items: center; margin-bottom: 25px; }
+        .ent-select { flex: 1; padding: 12px; border-radius: 8px; border: 1.5px solid #ccc; font-size: 14px; }
+        .ent-btn-fetch { background: #f2994a; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 12px; font-weight: bold; }
+        
+        .ent-section-title { background: #eee; padding: 10px; font-size: 12px; font-weight: bold; border-radius: 4px; margin-bottom: 15px; }
+        .ent-input-display { border-bottom: 1px solid #999; padding: 8px 0; margin-bottom: 20px; font-size: 14px; min-height: 20px; }
+        
+        .sup-btn-orange {
+            background: #f2994a; color: white; border: none; border-radius: 25px;
+            padding: 15px; width: 100%; font-size: 14px; font-weight: bold; cursor: pointer;
+            margin-bottom: 15px;
+        }
+        .sup-btn-gray {
+            background: #e0e0e0; color: #999; border: none; border-radius: 25px;
+            padding: 15px; width: 100%; font-size: 14px; font-weight: bold; cursor: not-allowed;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container" style="background: white;">
+        <div class="header" style="background-color: #f2994a; height: 75px;">
+            <div class="header-left">
+                <a href="supervisor_location.html" class="icon-btn" style="font-size: 24px;">←</a>
+                <span style="font-size: 20px; font-weight: 500; margin-left: 15px;">एचएलओ ऐप</span>
+            </div>
+            <div class="header-right">
+                <div style="display:flex; gap: 15px; color: white; font-size: 18px; margin-right: 15px;">
+                    <i class="fas fa-signal"></i>
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-three-quarters"></i>
+                    <span>44%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="ent-container">
+            <div class="ent-header-pill">जनगणना मकान विवरण</div>
+            
+            <p style="text-align: center; color: #f2994a; font-weight: bold; font-size: 14px; margin-bottom: 20px; text-decoration: underline;" onclick="viewSyncSummary()">पूर्व भरा डेटा देखें</p>
+
+            <label class="ent-label">1. लाइन क्रमांक:</label>
+            <div class="ent-select-row">
+                <select id="line-select" class="ent-select">
+                    <option value="">चुना गया</option>
+                    <!-- Will be populated -->
+                </select>
+                <button class="ent-btn-fetch" onclick="fetchRecord()">प्राप्त करें</button>
+            </div>
+
+            <label class="ent-label">2. भवन नम्बर:</label>
+            <div class="ent-input-display" id="display-q1"></div>
+
+            <label class="ent-label">3. जनगणना मकान नम्बर:</label>
+            <div class="ent-input-display" id="display-q2"></div>
+
+            <div style="display: flex; align-items: flex-start; gap: 10px; margin-top: 20px; margin-bottom: 20px;">
+                <input type="checkbox" id="hlb-done" style="margin-top: 5px;">
+                <label for="hlb-done" style="font-size: 12px; line-height: 1.4;">क्या इस एचएलबी का कार्य पूर्ण हो गया है?</label>
+            </div>
+
+            <button class="sup-btn-orange" onclick="viewAllDetails()">पूर्व भरा डेटा देखें</button>
+            
+            <div style="text-align: center;">
+                <button class="sup-btn-orange" style="opacity: 0.7;" disabled>सिंक करें</button>
+                <p style="font-size: 11px; color: #888; margin-top: 5px;">सभी रिकॉर्ड पूरे हो गए हैं। अभी सिंक करें</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        let selectedRecord = null;
+
+        function loadLines() {
+            const enumId = getFormState('selected_enumerator_id') || 'P001';
+            const mockData = getSupervisorMockData()[enumId];
+            const select = document.getElementById('line-select');
+            
+            if (mockData) {
+                mockData.records.forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r.id;
+                    opt.innerText = r.line;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        function fetchRecord() {
+            const recId = document.getElementById('line-select').value;
+            if (!recId) return;
+
+            const enumId = getFormState('selected_enumerator_id') || 'P001';
+            const mockData = getSupervisorMockData()[enumId];
+            const rec = mockData.records.find(r => r.id === recId);
+            
+            if (rec) {
+                selectedRecord = rec;
+                document.getElementById('display-q1').innerText = rec.q1;
+                document.getElementById('display-q2').innerText = rec.answers?.q2 || 'N/A';
+            }
+        }
+
+        function viewAllDetails() {
+            if (!selectedRecord) {
+                alert("कृपया पहले एक लाइन नंबर चुनें और 'प्राप्त करें' दबाएं।");
+                return;
+            }
+            // Pass the selected record answers to the review page
+            setFormState('answers', selectedRecord.answers);
+            setFormState('line', selectedRecord.line);
+            setFormState('q2', selectedRecord.answers?.q2);
+            window.location.href = 'supervisor_review.html';
+        }
+
+        window.onload = loadLines;
+    </script>
+</body>
+</html>
