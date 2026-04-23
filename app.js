@@ -244,7 +244,13 @@ function getSupervisorMockData() {
             if (idx % 2 === 0) {
                 records.push({ id: `MOCK-${id}-3`, line: '003', q1: '0102', answers: { q1: '0102', q2: '0003', q9: '003', q11: 'हरीश चन्द्र' }, status: 'Pending' });
             }
-        }
+        data[id] = {
+            name: names[idx],
+            records: records
+        };
+    });
+    return data;
+}
 
 /**
  * SUPERVISOR ACTIONS: Approve or Reject (Remark) a record
