@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - Census Form</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container" style="background-color: white;">
+        <!-- Header -->
+        <div class="header" style="background-color: #f2994a; height: 70px;">
+            <div class="header-left">
+                <a href="dashboard.html" class="icon-btn" style="font-size: 24px;">←</a>
+                <span style="font-size: 20px; font-weight: 500; margin-left: 15px;">एचएलओ डेटा</span>
+            </div>
+            <div class="header-right">
+                <a href="dashboard.html" class="icon-btn" style="font-size: 24px;"><i class="fas fa-home"></i></a>
+            </div>
+        </div>
+
+        <div id="status-bar" style="display: none; background: #fff8e1; padding: 10px 20px; font-weight: bold; border-bottom: 1px solid #ddd; font-size: 14px;">
+            मकान संख्या: <span id="top-house-num">0001</span> | SE ID: <span id="top-seid">N/A</span>
+        </div>
+
+        <form id="census-form" style="padding: 0 20px;">
+            <!-- Questions Container -->
+            <div id="q-container">
+                <!-- Screen 1: Questions 1, 2, 3 -->
+                <div class="question-section active" id="step-1">
+                    <!-- Q1 -->
+                    <div style="margin-bottom: 30px; font-size: 18px; font-weight: 500;">
+                        1. लाइन क्रमांक: <span id="display-line">037</span>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div style="margin-bottom: 30px;">
+                        <div style="font-size: 18px; font-weight: 500; margin-bottom: 10px;">2. भवन नम्बर</div>
+                        <div style="position: relative; border-bottom: 1px solid #999;">
+                            <select id="building-select" onchange="document.getElementById('building-input-hidden').value = this.value; isRepeated = false;" style="width: 100%; border: none; background: transparent; font-size: 16px; padding: 12px 0; appearance: none; -webkit-appearance: none; color: #333; font-weight: 500;">
+                                <option value="">भवन नम्बर दर्ज करें या चुनें</option>
+                            </select>
+                            <input type="hidden" id="building-input-hidden">
+                            <span style="position: absolute; right: 0; top: 15px; font-size: 12px; pointer-events: none;">▼</span>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 14px; color: #333; font-weight: 500;">यदि भवन नंबर समान है तो "दोहराएं" बटन को दबाएं।</div>
+                        <div style="text-align: right; margin-top: 10px;">
+                            <button type="button" class="nav-btn" id="btn-repeat-building" onclick="repeatBuilding()" style="background: #f2994a; color: white; border: none; padding: 10px 30px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">दोहराएं</button>
+                        </div>
+                    </div>
+
+                    <!-- Q3 -->
+                    <div style="margin-bottom: 30px;">
+                        <div style="font-size: 18px; font-weight: 500; margin-bottom: 10px;">3. जनगणना मकान नम्बर</div>
+                        <input type="text" id="display-house-val" class="app-input" style="border: 1px solid #999; border-radius: 4px; padding: 15px; margin-bottom: 15px; width: 100%; box-sizing: border-box; font-weight: bold; font-size: 18px; background: white;" value="0001" readonly>
+                        <div style="display: flex; gap: 20px; justify-content: center;">
+                            <button type="button" id="btn-repeat-house" class="nav-btn" onclick="repeatHouse()" style="background: #e0e0e0; color: #333; border: 1px solid #ccc; padding: 10px 25px; border-radius: 20px; font-weight: bold; flex: 1; max-width: 120px;">दोहराएं</button>
+                            <button type="button" id="btn-new-house" class="nav-btn" onclick="newHouse()" style="background: #e0e0e0; color: #333; border: 1px solid #ccc; padding: 10px 25px; border-radius: 20px; font-weight: bold; flex: 1; max-width: 120px;">नया</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SE ID Input Step -->
+                <div class="question-section" id="step-seid">
+                    <div class="question-text">12 अंकों की SE ID भरें</div>
+                    <input type="text" id="seid-input" maxlength="12" class="text-input" placeholder="ABC123456789" style="font-size: 20px; letter-spacing: 2px; text-transform: uppercase;">
+                    
+                    <div style="margin-top: 30px;">
+                        <div class="question-text">7. जनगणना मकान का उपयोग</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label"><input type="radio" name="q7" value="1" class="option-input">निवास (Residential)</label></li>
+                            <li class="option-item"><label class="option-label"><input type="radio" name="q7" value="2" class="option-input">निवास सह अन्य उपयोग</label></li>
+                        </ul>
+                    </div>
+                    <div style="margin-top: 30px;">
+                        <div class="question-text">9. परिवार संख्या (स्वचालित)</div>
+                        <input type="text" id="display-q9" class="text-input" value="001" readonly style="background: #f0f0f0;">
+                    </div>
+                </div>
+
+                <!-- Review Screen (Questions 1-34) -->
+                <div class="question-section" id="step-review" style="padding: 10px; background: white;">
+                    <div style="background: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-size: 20px; font-weight: bold; color: #333;">उत्तर समीक्षा</div>
+                    <div id="review-list" style="max-height: 70vh; overflow-y: auto; padding: 5px; background: white;">
+                        <!-- Questions will be auto-populated -->
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px; padding: 10px; background: white; border-top: 1px solid #eee;">
+                        <button type="button" class="nav-btn" onclick="alert('रद्द किया गया'); window.location.reload();" style="background: white; color: #333; border: 1px solid #999; border-radius: 20px; padding: 12px; font-size: 14px;">रद्द करें</button>
+                        <button type="button" class="nav-btn" onclick="alert('संपादन मोड चालू');" style="background: #e0e0e0; color: #999; border: none; border-radius: 20px; padding: 12px; font-size: 14px;">संपादित करें</button>
+                        <button type="button" class="nav-btn" onclick="submitForm()" style="background: #f2994a; color: white; border: none; border-radius: 20px; padding: 12px; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">पुष्टि करें</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav" id="normal-nav" style="background: transparent; border: none; justify-content: center; gap: 15px; position: relative; margin-top: 40px; padding-bottom: 40px;">
+                <button type="button" class="nav-btn" id="btn-prev" onclick="handlePrev()" style="background: #ffb74d; color: #333; border: 1px solid #333; border-radius: 20px; padding: 12px 25px; font-weight: bold;">पिछला</button>
+                <button type="button" class="nav-btn" style="background: #ffb74d; color: #333; border: 1px solid #333; border-radius: 20px; padding: 12px 25px; font-weight: bold;">सीधे जायें</button>
+                <button type="button" class="nav-btn" id="btn-next" onclick="handleNext()" style="background: #ffb74d; color: #333; border: 1px solid #333; border-radius: 20px; padding: 12px 25px; font-weight: bold;">अगला</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- SE ID Confirmation Modal -->
+    <div id="seid-modal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 350px; padding: 25px;">
+            <div style="background: #f2994a; color: white; padding: 10px; border-radius: 8px; margin: -25px -25px 20px -25px; font-weight: bold;">SE ID संदर्भ</div>
+            <p style="font-size: 16px; line-height: 1.5; margin: 20px 0;">क्या आप SE ID के साथ जारी रखना चाहते हैं?</p>
+            <div style="display: flex; gap: 20px; justify-content: center;">
+                <button type="button" class="nav-btn" onclick="closeSEID(false)" style="background: #f5f5f5; border: 1px solid #ccc; color: #666;">नहीं</button>
+                <button type="button" class="nav-btn" onclick="closeSEID(true)" style="background: #f2994a; color: white; border: none;">हाँ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        let currentBuilding = getNextBuildingNumber();
+        let currentHouse = getNextHouseNumber();
+        let currentLine = getNextLineNumber();
+        let isRepeated = false;
+
+        let isEditMode = false;
+        let editingRecordId = null;
+        let currentAnswers = {};
+
+        function initForm() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get('edit');
+            
+            if (editId) {
+                isEditMode = true;
+                editingRecordId = editId;
+                const synced = getSyncedRecords();
+                const pending = getPendingRecords();
+                const record = [...synced, ...pending].find(r => r.id === editId);
+                
+                if (record) {
+                    currentAnswers = record.answers || {};
+                    // Pre-fill top bar
+                    document.getElementById('top-house-num').innerText = record.q2 || "0000";
+                    // Skip to review directly
+                    currentIdx = steps.indexOf('review');
+                    updateUI();
+                    populateReview(1);
+                    return;
+                }
+            }
+
+            document.getElementById('display-line').innerText = currentLine;
+            
+            const pending = getPendingRecords();
+            const synced = getSyncedRecords();
+            const allRecords = [...synced, ...pending];
+
+            const select = document.getElementById('building-select');
+            const houseInput = document.getElementById('display-house-val');
+            const repeatBtn = document.getElementById('btn-repeat-house');
+            const newBtn = document.getElementById('btn-new-house');
+
+            // Logic for house numbering
+            if (allRecords.length === 0) {
+                currentHouse = '0001';
+                houseInput.value = currentHouse;
+                houseInput.style.background = '#f5f5f5';
+                
+                repeatBtn.disabled = true;
+                repeatBtn.style.opacity = '0.5';
+                repeatBtn.style.cursor = 'not-allowed';
+            } else {
+                repeatBtn.disabled = false;
+                repeatBtn.style.opacity = '1';
+                repeatBtn.style.cursor = 'pointer';
+                currentHouse = allRecords[allRecords.length - 1].q2;
+                houseInput.value = currentHouse;
+            }
+
+            let uniqueBuildings = [...new Set(allRecords.map(r => r.q1))];
+            if (uniqueBuildings.length === 0) {
+                for (let i = 1; i <= 37; i++) uniqueBuildings.push(i.toString().padStart(4, '0'));
+                currentBuilding = "0038";
+            } else {
+                currentBuilding = getNextBuildingNumber();
+            }
+
+            select.innerHTML = '<option value="">भवन नम्बर दर्ज करें या चुनें</option>';
+            uniqueBuildings.forEach(b => {
+                const opt = document.createElement('option');
+                opt.value = b; opt.innerText = b; select.appendChild(opt);
+            });
+
+            const nextB = currentBuilding;
+            const nextOpt = document.createElement('option');
+            nextOpt.value = nextB; nextOpt.innerText = nextB + " (नया)"; nextOpt.selected = true; select.appendChild(nextOpt);
+            document.getElementById('building-input-hidden').value = nextB;
+            
+            updateUI();
+        }
+
+        function repeatBuilding() {
+            const records = getPendingRecords();
+            if (records.length > 0) {
+                isRepeated = true;
+                currentBuilding = records[records.length - 1].q1;
+                document.getElementById('building-select').value = currentBuilding;
+                document.getElementById('building-input-hidden').value = currentBuilding;
+                alert("भवन नंबर दोहराया गया: " + currentBuilding);
+            } else {
+                alert("दोहराने के लिए कोई पिछला रिकॉर्ड नहीं है।");
+            }
+        }
+
+        function repeatHouse() {
+            const pending = getPendingRecords();
+            const synced = getSyncedRecords();
+            const all = [...synced, ...pending];
+            
+            if (all.length > 0) {
+                currentHouse = all[all.length - 1].q2;
+                const input = document.getElementById('display-house-val');
+                input.value = currentHouse;
+                input.style.border = '2px solid #f2994a';
+                alert("जनगणना मकान नम्बर दोहराया गया: " + currentHouse);
+            }
+        }
+
+        function newHouse() {
+            const pending = getPendingRecords();
+            const synced = getSyncedRecords();
+            const all = [...synced, ...pending];
+            
+            if (all.length === 0) {
+                currentHouse = '0001';
+            } else {
+                const lastHouse = all[all.length - 1].q2;
+                currentHouse = (parseInt(lastHouse) + 1).toString().padStart(4, '0');
+            }
+            const input = document.getElementById('display-house-val');
+            input.value = currentHouse;
+            input.style.border = '2px solid #f2994a';
+            alert("नया जनगणना मकान नम्बर: " + currentHouse);
+        }
+
+        const dynamicQuestions = [
+            { id: 4, text: "जनगणना मकान की दीवार में प्रयुक्त प्रमुख सामग्री", type: "radio", options: ["पक्की ईंट", "पत्थर", "मसाला", "कंक्रीट", "अन्य"] },
+            { id: 10, text: "परिवार के मुखिया का नाम", type: "text" },
+            { id: 33, text: "मोबाइल नम्बर", type: "text" }
+        ];
+
+        const container = document.getElementById('q-container');
+        dynamicQuestions.forEach((q) => {
+            const div = document.createElement('div');
+            div.className = 'question-section';
+            div.id = 'step-' + q.id;
+            let html = `<div class="question-text">${q.id}. ${q.text}</div>`;
+            if (q.type === 'text') {
+                html += `<input type="text" name="q${q.id}" class="text-input" placeholder="यहाँ टाइप करें...">`;
+            } else {
+                html += `<ul class="options-list">`;
+                q.options.forEach((opt, oIdx) => {
+                    html += `<li class="option-item"><label class="option-label"><input type="radio" name="q${q.id}" value="${oIdx+1}" class="option-input">${opt}</label></li>`;
+                });
+                html += `</ul>`;
+            }
+            div.innerHTML = html;
+            container.appendChild(div);
+        });
+
+        const steps = [1, 'seid', 'review', 4, 10, 33];
+        let currentIdx = 0;
+        let useSEID = false;
+
+        function updateUI() {
+            const sections = document.querySelectorAll('.question-section');
+            sections.forEach((s) => s.classList.remove('active'));
+            
+            const currentStepId = 'step-' + steps[currentIdx];
+            document.getElementById(currentStepId).classList.add('active');
+            
+            // Show status bar for step > 0
+            const statusBar = document.getElementById('status-bar');
+            if (currentIdx > 0) {
+                statusBar.style.display = 'block';
+                document.getElementById('top-house-num').innerText = currentHouse;
+                document.getElementById('top-seid').innerText = useSEID ? (document.getElementById('seid-input').value || 'ABC123456789') : 'N/A';
+            } else {
+                statusBar.style.display = 'none';
+            }
+
+            // Hide normal nav on review step
+            document.getElementById('normal-nav').style.display = (steps[currentIdx] === 'review') ? 'none' : 'flex';
+
+            document.getElementById('btn-prev').disabled = currentIdx === 0;
+            document.getElementById('btn-next').innerText = currentIdx === steps.length - 1 ? 'पूरा करें (Submit)' : 'अगला';
+            
+            if (steps[currentIdx] === 'review') {
+                populateReview();
+            }
+        }
+
+        function handleNext() {
+            if (currentIdx === 0) {
+                // Show SE ID Modal after Step 1
+                document.getElementById('seid-modal').style.display = 'flex';
+            } else if (steps[currentIdx] === 'seid') {
+                const seid = document.getElementById('seid-input').value;
+                if (seid.length < 12) {
+                    alert("कृपया 12 अंकों की वैध SE ID भरें");
+                    return;
+                }
+                currentIdx = steps.indexOf('review');
+                updateUI();
+            } else if (currentIdx < steps.length - 1) {
+                currentIdx++;
+                updateUI();
+            } else {
+                submitForm();
+            }
+        }
+
+        function closeSEID(choice) {
+            document.getElementById('seid-modal').style.display = 'none';
+            useSEID = choice;
+            if (useSEID) {
+                currentIdx = steps.indexOf('seid');
+            } else {
+                currentIdx = steps.indexOf(4); // Normal flow starts at Q4
+            }
+            updateUI();
+        }
+
+        let reviewPart = 1;
+        const defaultMockData = [
+            { id: 1, text: "क्रम संख्या", val: "037" },
+            { id: 2, text: "भवन नम्बर", val: "ghh" },
+            { id: 3, text: "जनगणना मकान नम्बर", val: "0036" },
+            { id: 4, text: "जनगणना मकान के फर्श में प्रयुक्त प्रमुख सामग्री", val: "1-मिट्टी" },
+            { id: 5, text: "जनगणना मकान की दीवार में प्रयुक्त प्रमुख सामग्री", val: "1-घास/फूस/बांस आदि" },
+            { id: 6, text: "जनगणना मकान की छत में प्रयुक्त प्रमुख सामग्री", val: "1-घास/फूस/बांस/लकड़ी/मिट्टी आदि" },
+            { id: 7, text: "जनगणना मकान के उपयोग का पता लगायें", val: "1-आवास" },
+            { id: 8, text: "जनगणना मकान की स्थिति", val: "1-अच्छी" },
+            { id: 9, text: "परिवार क्रमांक", val: "016" },
+            { id: 10, text: "इस परिवार में सामान्यतः रहने वाले व्यक्तियों की कुल संख्या", val: "8" },
+            { id: 11, text: "परिवार के मुखिया का नाम", val: "कमल" },
+            { id: 12, text: "लिंग", val: "1-पुरुष" },
+            { id: 13, text: "यदि अनुसूचित जाति/ अनुसूचित जनजाति या अन्य", val: "1-अनुसूचित जाति (SC)" },
+            { id: 14, text: "इस मकान के स्वामित्व की स्थिति", val: "1-अपना" },
+            { id: 15, text: "रहने योग्य उपलब्ध कमरों की संख्या", val: "5" },
+            { id: 16, text: "इस परिवार में रहने वाले विवाहित दंपतियों की संख्या(0,1,2,3...)", val: "5" },
+            { id: 17, text: "पेयजल का मुख्य स्रोत", val: "1-नल का पानी उपचारित स्रोत से" },
+            { id: 18, text: "पेयजल स्रोत की उपलब्धता", val: "1-परिसर के अन्दर" },
+            { id: 19, text: "प्रकाश का मुख्य स्रोत", val: "1-बिजली" },
+            { id: 20, text: "शौचालय की सुलभता", val: "1-केवल परिवार के लिए" },
+            { id: 21, text: "शौचालय का प्रकार", val: "1-पाईप सीवर पद्धति" },
+            { id: 22, text: "गंदे पानी की निकासी किससे जुड़ी हुई है:", val: "1-ढकी नाली से" },
+            { id: 23, text: "परिसर के अन्दर स्नान सुविधा की उपलब्धता :", val: "1-स्नानगृह" },
+            { id: 24, text: "रसोई घर और एलपीजी/पीएनजी गैस कनेक्शन की उपलब्धता", val: "2-एलपीजी/पीएनजी गैस कनेक्शन उपलब्ध नहीं है" },
+            { id: 25, text: "खाना पकाने के लिए प्रयुक्त मुख्य ईंधन", val: "4-पक्का कोयला/लिग्नाइट/कच्चा कोयला" },
+            { id: 26, text: "रेडियो/ट्रांजिस्टर", val: "3-अन्य किसी उपकरण पर" },
+            { id: 27, text: "टेलीविजन", val: "4-अन्य कोई" },
+            { id: 28, text: "इंटरनेट सुविधा", val: "3-किसी अन्य उपकरण (डिवाइस) में" },
+            { id: 29, text: "लैपटॉप/कम्प्यूटर", val: "2-नहीं" },
+            { id: 30, text: "टेलीफोन और मोबाइलफोन/स्मार्टफोन", val: "4-दोनों" },
+            { id: 31, text: "साईकिल और स्कूटर/मोटर साईकिल/मोपेड", val: "3-दोनों" },
+            { id: 32, text: "कार/जीप/वैन", val: "1-हाँ" },
+            { id: 33, text: "परिवार द्वारा उपभोग किए जाने वाला मुख्य अनाज", val: "4-बाजरा" },
+            { id: 34, text: "मोबाइल नम्बर", val: "9876543210" }
+        ];
+
+        function getMockReviewData() {
+            const user = getCurrentUser();
+            const stored = localStorage.getItem('census_mock_review_data_' + user.id);
+            return stored ? JSON.parse(stored) : defaultMockData;
+        }
+
+        function saveMockReviewData(data) {
+            const user = getCurrentUser();
+            localStorage.setItem('census_mock_review_data_' + user.id, JSON.stringify(data));
+        }
+
+        function populateReview(part = 1) {
+            reviewPart = part;
+            const list = document.getElementById('review-list');
+            
+            const labels = {
+                1: "क्रम संख्या", 2: "भवन नम्बर", 3: "जनगणना मकान नम्बर", 4: "जनगणना मकान के फर्श में प्रयुक्त प्रमुख सामग्री", 
+                5: "जनगणना मकान की दीवार में प्रयुक्त प्रमुख सामग्री", 6: "जनगणना मकान की छत में प्रयुक्त प्रमुख सामग्री", 7: "जनगणना मकान के उपयोग का पता लगायें", 
+                8: "जनगणना मकान की स्थिति", 9: "परिवार क्रमांक", 10: "इस परिवार में सामान्यतः रहने वाले व्यक्तियों की कुल संख्या",
+                11: "परिवार के मुखिया का नाम", 12: "लिंग", 13: "यदि अनुसूचित जाति/ अनुसूचित जनजाति या अन्य", 14: "इस मकान के स्वामित्व की स्थिति",
+                15: "रहने योग्य उपलब्ध कमरों की संख्या", 16: "इस परिवार में रहने वाले विवाहित दंपतियों की संख्या(0,1,2,3...)", 
+                17: "पेयजल का मुख्य स्रोत", 18: "पेयजल स्रोत की उपलब्धता", 19: "प्रकाश का मुख्य स्रोत", 20: "शौचालय की सुलभता",
+                21: "शौचालय का प्रकार", 22: "गंदे पानी की निकासी किससे जुड़ी हुई है:", 23: "परिसर के अन्दर स्नान सुविधा की उपलब्धता :",
+                24: "रसोई घर और एलपीजी/पीएनजी गैस कनेक्शन की उपलब्धता", 25: "खाना पकाने के लिए प्रयुक्त मुख्य ईंधन", 26: "रेдио/ट्रांजिस्टर",
+                27: "टेलीविजन", 28: "इंटरनेट सुविधा", 29: "लैपटॉप/कम्प्यूटर", 30: "टेलीफोन और मोबाइलफोन/स्मार्टफोन",
+                31: "साईकिल और स्कूटर/मोटर साईकिल/मोपेड", 32: "कार/जीप/वैन", 33: "परिवार द्वारा उपभोग किए जाने वाला मुख्य अनाज", 34: "मोबाइल नम्बर"
+            };
+
+            const reviewItems = [];
+            const mockData = getMockReviewData();
+
+            for(let i=1; i<=34; i++) {
+                let val = "डेटा उपलब्ध नहीं";
+                if (isEditMode) {
+                    val = currentAnswers['q'+i] || val;
+                } else if (useSEID) {
+                    const q = mockData.find(item => item.id === i);
+                    if (q) val = q.val;
+                }
+                reviewItems.push({ id: i, text: labels[i], val: val });
+            }
+            
+            const ranges = { 1: [1, 10], 2: [11, 22], 3: [23, 32], 4: [33, 34] };
+            const [start, end] = ranges[part];
+
+            let html = "";
+            for(let i=start; i<=end; i++) {
+                const q = reviewItems[i-1];
+                html += `
+                    <div class="review-card" style="background: #e3f2fd; border: 1px solid #bbdefb; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer;" onclick="editReviewItem(${i})">
+                        <div style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 5px;">${q.id}. ${q.text}</div>
+                        <div style="font-size: 14px; color: #2196f3; font-weight: 500;">${q.val}</div>
+                    </div>
+                `;
+            }
+            list.innerHTML = html;
+            list.scrollTop = 0;
+
+            const confirmBtn = document.querySelector('#step-review button:last-child');
+            const editBtn = document.querySelector('#step-review button:nth-child(2)');
+            const cancelBtn = document.querySelector('#step-review button:first-child');
+
+            if (part < 4) {
+                confirmBtn.onclick = () => populateReview(part + 1);
+                confirmBtn.innerText = "पुष्टि करें (Next)";
+            } else {
+                confirmBtn.onclick = submitForm;
+                confirmBtn.innerText = "पुष्टि करें (Submit)";
+            }
+
+            editBtn.onclick = () => alert("किसी भी कार्ड पर क्लिक करके डेटा बदलें।");
+
+            if (part > 1) {
+                cancelBtn.onclick = () => populateReview(part - 1);
+                cancelBtn.innerText = "पिछला";
+            } else {
+                cancelBtn.onclick = () => { 
+                    if (isEditMode) window.location.href = 'synced_records.html';
+                    else { currentIdx = steps.indexOf('seid'); updateUI(); }
+                };
+                cancelBtn.innerText = isEditMode ? "वापस" : "रद्द करें";
+            }
+        }
+
+        function editReviewItem(id) {
+            const labels = {
+                1: "क्रम संख्या", 2: "भवन नम्बर", 3: "जनगणना मकान नम्बर", 34: "मोबाइल नम्बर"
+            };
+            const label = labels[id] || "प्रश्न " + id;
+            
+            let currentVal = "";
+            if (isEditMode) {
+                currentVal = currentAnswers['q'+id] || "";
+            } else {
+                const data = getMockReviewData();
+                currentVal = data.find(q => q.id === id).val;
+            }
+
+            const newVal = prompt(`${label} के लिए नया उत्तर दर्ज करें:`, currentVal);
+            if (newVal !== null) {
+                if (isEditMode) {
+                    currentAnswers['q'+id] = newVal;
+                } else {
+                    const data = getMockReviewData();
+                    const idx = data.findIndex(q => q.id === id);
+                    data[idx].val = newVal;
+                    saveMockReviewData(data);
+                }
+                populateReview(reviewPart);
+            }
+        }
+
+        function submitForm() {
+            if (isEditMode) {
+                saveSyncedOverwrite(editingRecordId, currentAnswers);
+                alert("रिकॉर्ड सफलतापूर्वक अपडेट किया गया!");
+                window.location.href = 'synced_records.html';
+            } else {
+                alert("फॉर्म सफलतापूर्वक सबमिट किया गया!");
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        function handlePrev() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                updateUI();
+            }
+        }
+
+        function submitForm() {
+            if (isEditMode) {
+                saveSyncedOverwrite(editingRecordId, editAnswers);
+                alert("रिकॉर्ड सफलतापूर्वक अपडेट किया गया और Google Sheet (Simulated) के लिए सिंक किया गया!");
+                window.location.href = 'synced_records.html';
+                return;
+            }
+
+            const building = document.getElementById('building-input-hidden').value;
+            if (!building) { alert("कृपया भवन संख्या भरें"); return; }
+
+            const records = getPendingRecords();
+            const isAlreadyUsed = records.some(r => r.q1 === building);
+            if (isAlreadyUsed && !isRepeated) {
+                alert("Already Use: यह भवन नंबर पहले उपयोग किया जा चुका है!");
+                return;
+            }
+
+            // For new SE ID records, create final data object
+            const data = {};
+            if (useSEID) {
+                const mock = getMockReviewData();
+                mock.forEach(q => data['q'+q.id] = q.val);
+            } else {
+                const formData = new FormData(document.getElementById('census-form'));
+                formData.forEach((v, k) => data[k] = v);
+            }
+            
+            data.q1 = building;
+            data.q2 = currentHouse;
+            data.line = currentLine;
+            data.date = new Date().toLocaleDateString('hi-IN');
+
+            addPendingRecord(data);
+            alert("डेटा सफलतापूर्वक सहेजा गया!");
+            window.location.href = 'dashboard.html';
+        }
+
+        window.onload = initForm;
+    </script>
+</body>
+</html>

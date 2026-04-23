@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - Review</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container" style="background-color: white;">
+        <!-- Header -->
+        <div class="header" style="background-color: #f2994a; height: 70px;">
+            <div class="header-left">
+                <a href="dashboard.html" class="icon-btn" style="font-size: 24px;">←</a>
+                <span style="font-size: 20px; font-weight: 500; margin-left: 15px;">उत्तर समीक्षा</span>
+            </div>
+            <div class="header-right">
+                <a href="dashboard.html" class="icon-btn" style="font-size: 24px;"><i class="fas fa-home"></i></a>
+            </div>
+        </div>
+
+        <div id="review-container" style="padding: 10px;">
+            <div id="review-list" style="max-height: 70vh; overflow-y: auto; padding: 5px; padding-bottom: 100px;">
+                <!-- Cards appear here -->
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px; padding: 10px; border-top: 1px solid #eee;">
+                <button type="button" id="btn-cancel" class="nav-btn" onclick="handleCancel()" style="background: white; color: #333; border: 1px solid #999; border-radius: 20px; padding: 12px; font-size: 14px; flex: 1;">रद्द करें</button>
+                <button type="button" class="nav-btn" onclick="alert('संपादन के लिए कार्ड पर क्लिक करें।')" style="background: #e0e0e0; color: #666; border: none; border-radius: 20px; padding: 12px; font-size: 14px; flex: 1;">संपादित करें</button>
+                <button type="button" id="btn-confirm" class="nav-btn" onclick="handleConfirm()" style="background: #f2994a; color: white; border: none; border-radius: 20px; padding: 12px; font-size: 14px; flex: 1; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">पुष्टि करें</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        let currentPart = 1;
+        let isEditMode = false;
+        let editingId = null;
+        let currentAnswers = {};
+
+        const labels = {
+            1: "क्रम संख्या", 2: "भवन नम्बर", 3: "जनगणना मकान नम्बर", 4: "जनगणना मकान के फर्श में प्रयुक्त प्रमुख सामग्री", 
+            5: "जनगणना मकान की दीवार में प्रयुक्त प्रमुख सामग्री", 6: "जनगणना मकान की छत में प्रयुक्त प्रमुख सामग्री", 
+            7: "जनगणना मकान के उपयोग का पता लगायें", 8: "जनगणना मकान की स्थिति", 9: "परिवार क्रमांक", 10: "इस परिवार में सामान्यतः रहने वाले व्यक्तियों की कुल संख्या",
+            11: "परिवार के मुखिया का नाम", 12: "लिंग", 13: "यदि अनुसूचित जाति/ अनुसूचित जनजाति या अन्य", 14: "इस मकान के स्वामित्व की स्थिति",
+            15: "रहने योग्य उपलब्ध कमरों की संख्या", 16: "इस परिवार में रहने वाले विवाहित दंपतियों की संख्या(0,1,2,3...)", 
+            17: "पेयजल का मुख्य स्रोत", 18: "पेयजल स्रोत की उपलब्धता", 19: "प्रकाश का मुख्य स्रोत", 20: "शौचालय की सुलभता",
+            21: "शौचालय का प्रकार", 22: "गंदे पानी की निकासी किससे जुड़ी हुई है:", 23: "परिसर के अन्दर स्नान सुविधा की उपलब्धता :",
+            24: "रसोई घर और एलपीजी/पीएनजी गैस कनेक्शन की उपलब्धता", 25: "खाना पकाने के लिए प्रयुक्त मुख्य ईंधन", 26: "रेडियो/ट्रांजिस्टर",
+            27: "टेलीविजन", 28: "इंटरनेट सुविधा", 29: "लैपटॉप/कम्प्यूटर", 30: "टेलीफोन और मोबाइलफोन/स्मार्टफोन",
+            31: "साईकिल और स्कूटर/मोटर साईकिल/मोपेड", 32: "कार/जीप/वैन", 33: "परिवार द्वारा उपभोग किए जाने वाला मुख्य अनाज", 34: "मोबाइल नम्बर"
+        };
+
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            editingId = urlParams.get('edit');
+            
+            if (editingId) {
+                isEditMode = true;
+                const synced = getSyncedRecords();
+                const record = synced.find(r => r.id === editingId);
+                if (record) currentAnswers = record.answers;
+            } else {
+                // Load from form state
+                currentAnswers = getFormState('answers') || {};
+                
+                // CRITICAL FIX: Ensure q1, q2, q3 and line are mapped from top-level if missing
+                if (!currentAnswers.q1) currentAnswers.q1 = getFormState('q1');
+                if (!currentAnswers.q2) currentAnswers.q2 = getFormState('q2');
+                if (!currentAnswers.q3) currentAnswers.q3 = getFormState('q3');
+                if (!currentAnswers.line) currentAnswers.line = getFormState('line');
+
+                // If SE ID used, pre-fill with mock
+                if (getFormState('useSEID')) {
+                    const mock = JSON.parse(localStorage.getItem('census_mock_review_data_' + getCurrentUser().id)) || {};
+                    Object.keys(mock).forEach(k => { if(!currentAnswers[k]) currentAnswers[k] = mock[k]; });
+                }
+            }
+            renderPart(1);
+        };
+
+        function renderPart(part) {
+            currentPart = part;
+            const list = document.getElementById('review-list');
+            const ranges = { 1: [1, 10], 2: [11, 22], 3: [23, 32], 4: [33, 34] };
+            const [start, end] = ranges[part];
+
+            let html = "";
+            for (let i = start; i <= end; i++) {
+                const val = currentAnswers['q' + i] || "डेटा उपलब्ध नहीं";
+                html += `
+                    <div class="review-card" style="background: #e3f2fd; border: 1px solid #bbdefb; border-radius: 12px; padding: 15px; margin-bottom: 12px; cursor: pointer;" onclick="editItem(${i})">
+                        <div style="font-size: 13px; font-weight: bold; color: #333; margin-bottom: 5px;">${i}. ${labels[i]}</div>
+                        <div style="font-size: 14px; color: #2196f3; font-weight: 500;">${val}</div>
+                    </div>
+                `;
+            }
+            list.innerHTML = html;
+            list.scrollTop = 0;
+
+            document.getElementById('btn-confirm').innerText = part < 4 ? "पुष्टि करें (Next)" : "पुष्टि करें (Submit)";
+            document.getElementById('btn-cancel').innerText = part > 1 ? "पिछला" : "रद्द करें";
+        }
+
+        function editItem(id) {
+            const newVal = prompt(`${labels[id]} के लिए नया उत्तर:`, currentAnswers['q' + id] || "");
+            if (newVal !== null) {
+                currentAnswers['q' + id] = newVal;
+                renderPart(currentPart);
+            }
+        }
+
+        async function handleConfirm() {
+            const btn = document.getElementById('btn-confirm');
+            if (currentPart < 4) {
+                renderPart(currentPart + 1);
+            } else {
+                btn.innerText = "सहेजा जा रहा है...";
+                btn.disabled = true;
+
+                try {
+                    const editPendingIdx = getFormState('edit_pending_index');
+                    // Use master function from app.js
+                    await savePendingRecord(currentAnswers, editPendingIdx);
+                    
+                    alert("डेटा सफलतापूर्वक सहेज लिया गया है!");
+                    clearFormState();
+                    window.location.href = 'house_update.html';
+                } catch (error) {
+                    console.error("Save failed:", error);
+                    alert("सहेजने में समस्या आई: " + error.message);
+                    btn.innerText = "पुष्टि करें";
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        function handleCancel() {
+            if (currentPart > 1) renderPart(currentPart - 1);
+            else history.back();
+        }
+    </script>
+</body>
+</html>

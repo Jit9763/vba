@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - Summary</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header" style="background-color: #f2994a; height: 70px;">
+            <div class="header-left">
+                <a href="dashboard.html" class="icon-btn" style="font-size: 24px;">←</a>
+                <span style="font-size: 20px; font-weight: 500; margin-left: 15px;">सारांश</span>
+            </div>
+            <div class="header-right">
+                <span class="icon-btn" onclick="toggleDrawer()" style="font-size: 24px;">☰</span>
+            </div>
+        </div>
+
+        <div style="padding: 20px;">
+            <!-- Summary Cards -->
+            <div class="summary-card" style="border-left: 5px solid #2196f3; display: flex; justify-content: space-between; align-items: center; padding: 20px; background: white; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <span style="font-size: 16px; color: #666;">अपेक्षित भवन</span>
+                <span id="sum-exp-buildings" style="font-size: 24px; font-weight: bold; color: #f2994a;">60</span>
+            </div>
+
+            <div class="summary-card" style="border-left: 5px solid #9c27b0; display: flex; justify-content: space-between; align-items: center; padding: 20px; background: white; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <span style="font-size: 16px; color: #666;">अपेक्षित मकान</span>
+                <span id="sum-exp-houses" style="font-size: 24px; font-weight: bold; color: #f2994a;">100</span>
+            </div>
+
+            <div class="summary-card" style="border-left: 5px solid #ff9800; display: flex; justify-content: space-between; align-items: center; padding: 20px; background: white; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <span style="font-size: 16px; color: #666;">प्रविष्ट कुल मकान</span>
+                <span id="sum-total-entered" style="font-size: 24px; font-weight: bold; color: #f2994a;">37</span>
+            </div>
+
+            <div class="summary-card" style="border-left: 5px solid #4caf50; display: flex; justify-content: space-between; align-items: center; padding: 20px; background: white; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <span style="font-size: 16px; color: #666;">पूर्ण/सिंक</span>
+                <span id="sum-synced" style="font-size: 24px; font-weight: bold; color: #f2994a;">35</span>
+            </div>
+
+            <div class="summary-card" style="border-left: 5px solid #f44336; display: flex; justify-content: space-between; align-items: center; padding: 20px; background: white; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <span style="font-size: 16px; color: #666;">लंबित</span>
+                <span id="sum-pending" style="font-size: 24px; font-weight: bold; color: #f2994a;">0</span>
+            </div>
+
+            <h3 style="margin: 30px 0 15px 0;">मकान की स्थिति</h3>
+            <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="display: flex; gap: 5px; height: 30px; margin-bottom: 20px;">
+                    <div style="flex: 70%; background: #4caf50; border-radius: 4px;"></div>
+                    <div style="flex: 20%; background: #ff9800; border-radius: 4px;"></div>
+                    <div style="flex: 10%; background: #f44336; border-radius: 4px;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-around; font-size: 11px;">
+                    <span>🟢 अच्छी (70%)</span>
+                    <span>🟡 रहने योग्य (20%)</span>
+                    <span>🔴 जीर्ण-शीर्ण (10%)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+    <script>
+        function updateSummary() {
+            const pending = getPendingRecords();
+            const synced = getSyncedRecords();
+            const total = pending.length + synced.length;
+
+            const expBuildings = localStorage.getItem('census_expected_buildings') || '60';
+            const expHouses = localStorage.getItem('census_expected_houses') || '100';
+
+            document.getElementById('sum-exp-buildings').innerText = expBuildings;
+            document.getElementById('sum-exp-houses').innerText = expHouses;
+            document.getElementById('sum-total-entered').innerText = total;
+            document.getElementById('sum-synced').innerText = synced.length;
+            document.getElementById('sum-pending').innerText = pending.length;
+        }
+        window.onload = updateSummary;
+    </script>
+</body>
+</html>

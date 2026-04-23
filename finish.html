@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - Finish</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="header-left">
+                <a href="dashboard.html" class="icon-btn">←</a>
+                <span>ब्लॉक कार्य पूर्ण करें</span>
+            </div>
+        </div>
+        
+        <div style="padding: 25px; text-align: center;">
+            <div style="font-size: 50px; margin-bottom: 20px;">🏆</div>
+            <h3>कार्य पूर्णता प्रमाणन</h3>
+            <p style="text-align: left; font-size: 13px; line-height: 1.6; color: #555; background: #f9f9f9; padding: 15px; border-radius: 8px;">
+                मैं प्रमाणित करता हूँ कि मेरे लिए आवंटित गणना ब्लॉक नम्बर <b>0003</b> का कार्य पूर्ण हो गया है और सभी विवरणों को सावधानीपूर्वक दर्ज कर दिया गया है। 
+            </p>
+            
+            <div style="margin-top: 30px; text-align: left;">
+                <label style="display: flex; gap: 10px; font-size: 12px; cursor: pointer;">
+                    <input type="checkbox" id="confirm-chk"> हाँ, मैं घोषणा करता हूँ।
+                </label>
+            </div>
+
+            <button id="finish-btn" class="nav-btn nav-btn-primary" style="width: 100%; margin-top: 40px; opacity: 0.5;" disabled onclick="finalizeBlock()">
+                ब्लॉक पूर्ण घोषित करें
+            </button>
+        </div>
+    </div>
+    <script src="app.js"></script>
+    <script>
+        const chk = document.getElementById('confirm-chk');
+        const btn = document.getElementById('finish-btn');
+        chk.onchange = () => {
+            btn.disabled = !chk.checked;
+            btn.style.opacity = chk.checked ? 1 : 0.5;
+        };
+
+        function finalizeBlock() {
+            alert("बधाई हो! ब्लॉक 0003 का कार्य पूर्ण घोषित कर दिया गया है।");
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

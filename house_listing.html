@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - House Listing</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container" style="background-color: white;">
+        <!-- Header -->
+        <div class="header" style="background-color: #f2994a; height: 70px;">
+            <div class="header-left">
+                <a href="dashboard.html" class="icon-btn" style="font-size: 24px;">←</a>
+                <span style="font-size: 20px; font-weight: 500; margin-left: 15px;">एचएलओ डेटा</span>
+            </div>
+            <div class="header-right">
+                <a href="dashboard.html" class="icon-btn" style="font-size: 24px;"><i class="fas fa-home"></i></a>
+            </div>
+        </div>
+
+        <div style="padding: 20px;">
+            <!-- Q1 -->
+            <div style="margin-bottom: 30px; font-size: 18px; font-weight: 500;">
+                1. लाइन क्रमांक: <span id="display-line">037</span>
+            </div>
+
+            <!-- Q2 -->
+            <div style="margin-bottom: 30px;">
+                <div style="font-size: 18px; font-weight: 500; margin-bottom: 10px;">2. भवन नम्बर</div>
+                <div style="position: relative; border-bottom: 1px solid #999;">
+                    <select id="building-select" onchange="updateBuilding(this.value)" style="width: 100%; border: none; background: transparent; font-size: 16px; padding: 12px 0; appearance: none; -webkit-appearance: none; color: #333; font-weight: 500;">
+                        <option value="">भवन नम्बर दर्ज करें या चुनें</option>
+                    </select>
+                    <span style="position: absolute; right: 0; top: 15px; font-size: 12px; pointer-events: none;">▼</span>
+                </div>
+                <div style="margin-top: 10px; font-size: 14px; color: #333; font-weight: 500;">यदि भवन नंबर समान है तो "दोहराएं" बटन को दबाएं।</div>
+                <div style="text-align: right; margin-top: 10px;">
+                    <button type="button" class="nav-btn" onclick="repeatBuilding()" style="background: #f2994a; color: white; border: none; padding: 10px 30px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">दोहराएं</button>
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div style="margin-bottom: 30px;">
+                <div style="font-size: 18px; font-weight: 500; margin-bottom: 10px;">3. जनगणना मकान नम्बर</div>
+                <input type="text" id="display-house-val" class="app-input" style="border: 1px solid #999; border-radius: 4px; padding: 15px; margin-bottom: 15px; width: 100%; box-sizing: border-box; font-weight: bold; font-size: 18px; background: white;" value="0001" readonly>
+                <div style="display: flex; gap: 20px; justify-content: center;">
+                    <button type="button" id="btn-repeat-house" class="nav-btn" onclick="repeatHouse()" style="background: #e0e0e0; color: #333; border: 1px solid #ccc; padding: 10px 25px; border-radius: 20px; font-weight: bold; flex: 1; max-width: 120px;">दोहराएं</button>
+                    <button type="button" id="btn-new-house" class="nav-btn" onclick="newHouse()" style="background: #e0e0e0; color: #333; border: 1px solid #ccc; padding: 10px 25px; border-radius: 20px; font-weight: bold; flex: 1; max-width: 120px;">नया</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav" style="background: transparent; border: none; justify-content: center; gap: 15px; position: relative; margin-top: 40px; padding-bottom: 40px;">
+            <button type="button" class="nav-btn" onclick="history.back()" style="background: #ffb74d; color: #333; border: 1px solid #333; border-radius: 20px; padding: 12px 25px; font-weight: bold;">पिछला</button>
+            <button type="button" class="nav-btn" style="background: #ffb74d; color: #333; border: 1px solid #333; border-radius: 20px; padding: 12px 25px; font-weight: bold;">सीड़े जायें</button>
+            <button type="button" class="nav-btn" onclick="goToNext()" style="background: #ffb74d; color: #333; border: 1px solid #333; border-radius: 20px; padding: 12px 25px; font-weight: bold;">अगला</button>
+        </div>
+    </div>
+
+    <!-- SE ID Modal -->
+    <div id="seid-modal" class="modal" style="display: none; background: rgba(0,0,0,0.5);">
+        <div class="modal-content" style="width: 85%; max-width: 350px; padding: 30px 20px; border-radius: 15px;">
+            <div style="font-size: 18px; font-weight: 500; margin-bottom: 25px;">क्या आप SE ID के साथ जारी रखना चाहते हैं?</div>
+            <div style="display: flex; gap: 20px; justify-content: center;">
+                <button type="button" class="nav-btn" onclick="handleSEID(false)" style="background: #f5f5f5; border: 1px solid #ccc; color: #666; flex:1;">नहीं</button>
+                <button type="button" class="nav-btn" onclick="handleSEID(true)" style="background: #f2994a; color: white; border: none; flex:1;">हाँ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        let currentBuilding = '';
+        let currentHouse = '';
+        let currentLine = '';
+        let lastRecord = null;
+
+        window.onload = () => {
+            currentLine = getNextLineNumber();
+            currentHouse = getNextHouseNumber();
+            currentBuilding = getNextBuildingNumber();
+            
+            document.getElementById('display-line').innerText = currentLine;
+            document.getElementById('display-house-val').value = currentHouse;
+
+            loadBuildings();
+            
+            // Add the "New" building as the selected option
+            const select = document.getElementById('building-select');
+            const nextOpt = document.createElement('option');
+            nextOpt.value = currentBuilding; 
+            nextOpt.innerText = currentBuilding + " (नई बिल्डिंग)"; 
+            nextOpt.selected = true;
+            select.appendChild(nextOpt);
+            
+            setFormState('q1', currentBuilding);
+        };
+
+        function loadBuildings() {
+            // Start with training/synced records ALWAYS
+            let allRecords = [...getSyncedRecords()];
+            
+            // Then scan for all other pending records across all IDs
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('census_pending_records')) {
+                    try {
+                        const data = JSON.parse(localStorage.getItem(key));
+                        if (Array.isArray(data)) allRecords = allRecords.concat(data);
+                    } catch(e) {}
+                }
+            }
+
+            const buildings = [...new Set(allRecords.map(r => r.q1 || r.answers?.q1))].filter(b => b).sort();
+            const select = document.getElementById('building-select');
+            select.innerHTML = '<option value="">-- भवन चुनें --</option>';
+            buildings.forEach(b => {
+                select.innerHTML += `<option value="${b}">${b}</option>`;
+            });
+        }
+
+        function updateBuilding(val) {
+            currentBuilding = val;
+            setFormState('q1', val);
+        }
+
+        function repeatBuilding() {
+            if (lastRecord) {
+                currentBuilding = lastRecord.q1 || (lastRecord.answers ? lastRecord.answers.q1 : '');
+                if (currentBuilding) {
+                    document.getElementById('building-select').value = currentBuilding;
+                    updateBuilding(currentBuilding);
+                }
+            } else {
+                alert("दोहराने के लिए कोई पिछला रिकॉर्ड नहीं है।");
+            }
+        }
+
+        function repeatHouse() {
+            if (lastRecord) {
+                currentHouse = lastRecord.q2 || (lastRecord.answers ? lastRecord.answers.q2 : '');
+                if (currentHouse) {
+                    document.getElementById('display-house-val').value = currentHouse;
+                    // Reset house UI
+                    document.getElementById('btn-repeat-house').style.background = '#f2994a';
+                    document.getElementById('btn-repeat-house').style.color = 'white';
+                    document.getElementById('btn-new-house').style.background = '#e0e0e0';
+                    document.getElementById('btn-new-house').style.color = '#333';
+                }
+            } else {
+                alert("दोहराने के लिए कोई पिछला रिकॉर्ड नहीं है।");
+            }
+        }
+
+        function newHouse() {
+            currentHouse = getNextHouseNumber();
+            document.getElementById('display-house-val').value = currentHouse;
+            // Reset house UI
+            document.getElementById('btn-new-house').style.background = '#f2994a';
+            document.getElementById('btn-new-house').style.color = 'white';
+            document.getElementById('btn-repeat-house').style.background = '#e0e0e0';
+            document.getElementById('btn-repeat-house').style.color = '#333';
+        }
+
+        function goToNext() {
+            if (!currentBuilding) {
+                alert("कृपया भवन नम्बर चुनें या दर्ज करें।");
+                return;
+            }
+            // Save to top level state
+            setFormState('q1', currentBuilding);
+            setFormState('q2', currentHouse);
+            setFormState('q3', currentHouse);
+            setFormState('line', currentLine);
+            
+            // Also ensure it is in the answers object for the review page
+            let answers = getFormState('answers') || {};
+            answers.q1 = currentBuilding;
+            answers.q2 = currentHouse;
+            answers.q3 = currentHouse;
+            answers.line = currentLine;
+            setFormState('answers', answers);
+            
+            document.getElementById('seid-modal').style.display = 'flex';
+        }
+
+        function handleSEID(use) {
+            setFormState('useSEID', use);
+            if (use) window.location.href = 'house_seid.html';
+            else window.location.href = 'house_questions.html';
+        }
+    </script>
+</body>
+</html>

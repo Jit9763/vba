@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .step-hidden { display: none; }
+        .step-active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main Login Step -->
+        <div id="step-login" class="step-active">
+            <div class="header">
+                <span>HLO App</span>
+                <span class="lang-pill">English / हिन्दी</span>
+            </div>
+            <div class="auth-logo-container">
+                <img src="census_logo.png" class="auth-logo" alt="Census Logo">
+            </div>
+            <div class="login-card">
+                <div class="input-group">
+                    <label>उपयोगकर्ता आईडी (User ID)</label>
+                    <input type="text" id="login-id" class="app-input" placeholder="User ID दर्ज करें" value="e001">
+                </div>
+                <div class="input-group">
+                    <label>पासवर्ड (Password)</label>
+                    <input type="password" id="login-pass" class="app-input" placeholder="Password दर्ज करें">
+                </div>
+                <div class="input-group">
+                    <label>कैप्चा कोड (Captcha)</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span style="background: #eee; padding: 10px; font-weight: bold; letter-spacing: 2px;">JcLVA*</span>
+                        <input type="text" class="app-input" placeholder="कैप्चा दर्ज करें">
+                    </div>
+                </div>
+                <button type="button" class="nav-btn nav-btn-primary" style="width: 100%; border-radius: 8px;" onclick="handleNextStep('step-otp')">लॉगिन करें</button>
+            </div>
+        </div>
+
+        <!-- OTP Step (Screen 1) -->
+        <div id="step-otp" class="step-hidden">
+            <div class="auth-header">
+                <span class="icon-btn" onclick="handleNextStep('step-login')">←</span>
+                <span>एचएलओ ऐप</span>
+            </div>
+            <div class="auth-logo-container">
+                <img src="census_logo.png" class="auth-logo">
+            </div>
+            <div class="otp-inputs">
+                <input type="text" class="otp-box" maxlength="1">
+                <input type="text" class="otp-box" maxlength="1">
+                <input type="text" class="otp-box" maxlength="1">
+                <input type="text" class="otp-box" maxlength="1">
+                <input type="text" class="otp-box" maxlength="1">
+                <input type="text" class="otp-box" maxlength="1">
+            </div>
+            <div style="padding: 0 20px;">
+                <button type="button" class="nav-btn btn-filled" style="width: 100%;" onclick="handleNextStep('step-password-login')">ओटीपी सत्यापित करें</button>
+                <p style="text-align: center; font-size: 12px; color: #777; margin-top: 20px;">ओटीपी पुनः 53 सेकंड में भेजें</p>
+            </div>
+        </div>
+
+        <!-- Password Login Step (Screen 2) -->
+        <div id="step-password-login" class="step-hidden">
+            <div class="auth-header">
+                <span class="icon-btn" onclick="handleNextStep('step-otp')">←</span>
+                <span>एचएलओ ऐप</span>
+                <span style="margin-left: auto; font-size: 14px;"><i class="fas fa-globe"></i> हिन्दी</span>
+            </div>
+            <div class="auth-logo-container">
+                <img src="census_logo.png" class="auth-logo">
+                <p style="font-weight: bold; margin-top: 10px;">भारत की जनगणना 2027</p>
+            </div>
+            <div style="padding: 0 20px;">
+                <div class="input-group">
+                    <input type="text" class="app-input" placeholder="पासवर्ड">
+                </div>
+                <div class="btn-row" style="padding: 0; margin-bottom: 20px;">
+                    <button type="button" class="nav-btn btn-filled" style="width: 100%;" onclick="handleNextStep('step-set-pin')">सबमिट करें</button>
+                </div>
+                <button type="button" class="nav-btn btn-outline" style="width: 100%;" onclick="handleNextStep('step-login')">रद्द करें</button>
+                <a href="#" class="forgot-pass">पासवर्ड पुनः प्राप्त करें</a>
+            </div>
+            <div class="auth-footer">
+                भारत के महारजिस्ट्रार एवं जनगणना<br>
+                आयुक्त का कार्यालय गृह मंत्रालय, भारत सरकार<br>
+                द्वारा डिजाइन और विकसित
+            </div>
+        </div>
+
+        <!-- Set PIN Step (Screen 3) -->
+        <div id="step-set-pin" class="step-hidden">
+            <div class="auth-header">
+                <span class="icon-btn" onclick="handleNextStep('step-password-login')">←</span>
+                <span>एचएलओ ऐप</span>
+            </div>
+            <div class="auth-logo-container">
+                <img src="census_logo.png" class="auth-logo">
+                <p style="margin-top: 20px; font-weight: 500;">पिन सेट करें</p>
+            </div>
+            <div class="pin-dots">
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+            </div>
+            <div class="btn-row">
+                <button type="button" class="nav-btn btn-outline-purple" onclick="handleNextStep('step-login')">रद्द करें</button>
+                <button type="button" class="nav-btn btn-purple" onclick="handleNextStep('step-confirm-pin')">अगला</button>
+            </div>
+        </div>
+
+        <!-- Confirm PIN Step (Screen 4) -->
+        <div id="step-confirm-pin" class="step-hidden">
+            <div class="auth-header">
+                <span class="icon-btn" onclick="handleNextStep('step-set-pin')">←</span>
+                <span>एचएलओ ऐप</span>
+            </div>
+            <div class="auth-logo-container">
+                <img src="census_logo.png" class="auth-logo">
+                <p style="margin-top: 20px; font-weight: 500;">पिन की पुष्टि करें</p>
+            </div>
+            <div class="pin-dots">
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+            </div>
+            <div class="btn-row">
+                <button type="button" class="nav-btn btn-outline-purple" onclick="handleNextStep('step-login')">रद्द करें</button>
+                <button type="button" class="nav-btn btn-purple" onclick="finalizeLogin()">सबमिट करें</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function handleNextStep(nextId) {
+            console.log('Navigating to:', nextId);
+            document.querySelectorAll('[id^="step-"]').forEach(s => s.className = 'step-hidden');
+            const nextStep = document.getElementById(nextId);
+            if (nextStep) {
+                nextStep.className = 'step-active';
+            } else {
+                console.error('Step not found:', nextId);
+            }
+        }
+
+        function finalizeLogin() {
+            console.log('Finalizing login...');
+            try {
+                const userIdInput = document.getElementById('login-id');
+                const userId = (userIdInput && userIdInput.value) ? userIdInput.value.toLowerCase() : 'e001';
+                const role = userId.startsWith('s') ? 'supervisor' : 'enumerator';
+                
+                if (typeof setCurrentUser === 'function') {
+                    setCurrentUser(userId, role);
+                } else {
+                    console.warn('setCurrentUser not found, saving locally...');
+                    localStorage.setItem('census_user_id', userId);
+                    localStorage.setItem('census_user_role', role);
+                }
+            } catch (e) {
+                console.error('Error in finalizeLogin:', e);
+            }
+            
+            console.log('Redirecting to location_details.html');
+            window.location.href = 'location_details.html';
+        }
+
+        // Auto-focus OTP boxes
+        document.querySelectorAll('.otp-box').forEach((box, idx) => {
+            box.addEventListener('input', (e) => {
+                if (e.target.value.length === 1 && idx < 5) {
+                    const boxes = document.querySelectorAll('.otp-box');
+                    if (boxes[idx + 1]) boxes[idx + 1].focus();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

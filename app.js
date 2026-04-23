@@ -1,0 +1,204 @@
+// Global Configurations
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwm8kRsJJwjNToMqIoTX3stVhHN9SYfDvdsINkMjHwnOhGmWzG5lv1-dsPivYmvCbP9/exec";
+
+// User Session Management
+function getCurrentUser() {
+    return {
+        id: localStorage.getItem('census_user_id') || 'Guest',
+        role: localStorage.getItem('census_user_role') || 'enumerator'
+    };
+}
+
+// Census Data Access Helpers
+function getSyncedRecords() {
+    const user = getCurrentUser();
+    const syncedKey = 'census_synced_records_' + user.id;
+    const manualData = localStorage.getItem(syncedKey);
+    let manualRecords = manualData ? JSON.parse(manualData) : [];
+    
+    // Always generate the 15 core training records
+    const dummyData = [];
+    const today = new Date().toLocaleDateString('hi-IN');
+    const dummyPeople = [
+        {name: "Manoj", members: "5"}, {name: "Rajesh", members: "4"},
+        {name: "Suman", members: "3"}, {name: "Prakash", members: "6"},
+        {name: "Amit", members: "5"}, {name: "Suresh", members: "4"},
+        {name: "Kiran", members: "2"}, {name: "Anita", members: "5"},
+        {name: "Sunil", members: "3"}, {name: "Meena", members: "4"},
+        {name: "Vijay", members: "6"}, {name: "Radha", members: "5"},
+        {name: "Deepak", members: "4"}, {name: "Geeta", members: "3"},
+        {name: "Rahul", members: "5"}
+    ];
+
+    const baseAnswers = {
+        "q4": "1-मिट्टी", "q5": "1-घास/फूस/बांस आदि", "q6": "1-घास/फूस/बांस/लकड़ी/मिट्टी आदि",
+        "q7": "1-आवास", "q8": "1-अच्छी", "q12": "1-पुरुष", "q13": "1-अनुसूचित जाति (SC)",
+        "q14": "1-अपना", "q15": "3", "q16": "2", "q17": "1-नल का पानी उपचारित स्रोत से"
+    };
+
+    dummyPeople.forEach((p, i) => {
+        const bNo = (i+1).toString().padStart(4, '0');
+        dummyData.push({
+            id: 'REC-DUMMY-' + (i+1).toString().padStart(3, '0'),
+            q1: bNo, q2: "0001", line: (i+1).toString().padStart(3, '0'),
+            date: today, status: 'Approved',
+            answers: { ...baseAnswers, q1: bNo, q2: "0001", q3: "0001", q9: "001", q10: p.members, q11: p.name }
+        });
+    });
+
+    // Merge manual records with training data (training data comes first)
+    // Avoid duplicate IDs if user edited a training record
+    const finalRecords = [...dummyData];
+    manualRecords.forEach(m => {
+        if (!finalRecords.find(d => d.id === m.id)) finalRecords.push(m);
+    });
+    
+    return finalRecords;
+}
+
+function getPendingRecords(userId) {
+    const user = userId || getCurrentUser().id;
+    const data = localStorage.getItem('census_pending_records_' + user);
+    let records = [];
+    try {
+        if (data) records = JSON.parse(data);
+    } catch(e) {}
+    return Array.isArray(records) ? records : [];
+}
+
+function getAllRecords() {
+    const synced = getSyncedRecords();
+    const pending = getPendingRecords();
+    let all = [];
+    synced.forEach(r => all.push({ ...r, status: 'Approved' }));
+    pending.forEach(r => all.push({ ...r, status: 'Pending' }));
+    
+    const unique = [];
+    const seen = new Set();
+    
+    all.sort((a, b) => {
+        const aPend = a.status === 'Pending' ? 1 : 0;
+        const bPend = b.status === 'Pending' ? 1 : 0;
+        if (aPend !== bPend) return bPend - aPend;
+        return b.id.localeCompare(a.id);
+    });
+    
+    all.forEach(r => {
+        if (r && r.id && !seen.has(r.id)) {
+            seen.add(r.id);
+            unique.push(r);
+        }
+    });
+    return unique;
+}
+
+async function savePendingRecord(answers, editIndex = null) {
+    const user = getCurrentUser();
+    const storageKey = 'census_pending_records_' + user.id;
+    const finalAnswers = answers || {};
+    
+    try {
+        let records = getPendingRecords(user.id);
+        
+        const q1 = finalAnswers.q1 || getFormState('q1') || '0001';
+        const q2 = finalAnswers.q2 || getFormState('q2') || '0001';
+        const line = finalAnswers.line || getFormState('line') || '001';
+
+        const newRecord = {
+            id: 'REC-PEND-' + Date.now(),
+            q1: q1, q2: q2, line: line,
+            date: new Date().toLocaleDateString('hi-IN'),
+            status: 'Pending',
+            answers: finalAnswers
+        };
+
+        if (editIndex !== null && records[editIndex]) {
+            records[editIndex].answers = finalAnswers;
+            records[editIndex].q1 = q1;
+            records[editIndex].q2 = q2;
+            records[editIndex].line = line;
+        } else {
+            records.push(newRecord);
+        }
+
+        localStorage.setItem(storageKey, JSON.stringify(records));
+        localStorage.setItem('census_pending_records_backup', JSON.stringify(records));
+        
+        // Background sync
+        syncToGoogleSheet([newRecord]);
+        
+        console.log("Success: Record saved locally");
+        return true;
+    } catch (e) {
+        console.error("Save Error:", e);
+        throw e;
+    }
+}
+
+function syncToGoogleSheet(records) {
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(records)
+    }).catch(err => console.warn("Background sync failed."));
+}
+
+// Census Numbering Logic
+function getNextLineNumber() {
+    const records = getPendingRecords();
+    const synced = getSyncedRecords();
+    return (records.length + synced.length + 1).toString().padStart(3, '0');
+}
+
+function getNextBuildingNumber() {
+    const all = [...getSyncedRecords(), ...getPendingRecords()];
+    if (all.length === 0) return '0001';
+    let max = 0;
+    all.forEach(r => {
+        const n = parseInt(r.q1 || (r.answers ? r.answers.q1 : 0));
+        if (!isNaN(n) && n > max) max = n;
+    });
+    return (max + 1).toString().padStart(4, '0');
+}
+
+function getNextHouseNumber() {
+    const all = [...getSyncedRecords(), ...getPendingRecords()];
+    if (all.length === 0) return '0001';
+    let max = 0;
+    all.forEach(r => {
+        const n = parseInt(r.q2 || (r.answers ? r.answers.q2 : 0));
+        if (!isNaN(n) && n > max) max = n;
+    });
+    return (max + 1).toString().padStart(4, '0');
+}
+
+// State Management
+function setFormState(key, value) {
+    const state = JSON.parse(localStorage.getItem('census_form_state') || '{}');
+    state[key] = value;
+    localStorage.setItem('census_form_state', JSON.stringify(state));
+}
+
+function getFormState(key) {
+    const state = JSON.parse(localStorage.getItem('census_form_state') || '{}');
+    return state[key];
+}
+
+function clearFormState() {
+    localStorage.removeItem('census_form_state');
+}
+
+function logout() {
+    localStorage.removeItem('census_user_id');
+    localStorage.removeItem('census_user_role');
+    window.location.href = 'index.html';
+}
+
+function showAbout() {
+    alert("यह जनगणना पोर्टल जितेंद्र कुमार चौधरी द्वारा ट्रेनिंग हेतु विकसित किया गया है।");
+}
+
+function showMap() {
+    window.open('hlb_map.png', '_blank');
+}

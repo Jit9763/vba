@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - Location Details</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container" style="padding-top: 20px; position: relative;">
+        <!-- Floating Hamburger Menu -->
+        <button class="icon-btn" onclick="toggleDrawer()" style="position: absolute; top: 20px; left: 15px; color: #333; font-size: 24px; z-index: 50;">
+            <i class="fas fa-bars"></i>
+        </button>
+        <!-- App Icon and Label -->
+        <div style="text-align: center; margin-bottom: 30px;">
+            <img src="census_logo.png" height="80" alt="Census Logo">
+            <h2 style="font-weight: bold; margin-top: 15px; font-size: 20px;">भारत की जनगणना 2027</h2>
+        </div>
+
+        <!-- Sub-header -->
+        <div style="padding: 0 15px; margin-bottom: 10px; font-size: 18px; color: #333;">
+            लोकेशन विवरण - एचएलबी(1/3)
+        </div>
+
+        <!-- HLB Dropdown -->
+        <div style="padding: 0 15px; margin-bottom: 20px;">
+            <select class="app-input" style="background: #fff; border: 1px solid #ccc; font-size: 18px; padding: 15px;">
+                <option>0003</option>
+            </select>
+        </div>
+
+        <!-- Location Info List -->
+        <div style="padding: 0 15px; line-height: 1.8; font-size: 18px; color: #000;">
+            <div>राज्य/संघ राज्य क्षेत्र: Rajasthan-08</div>
+            <div>जिला: Ajmer-01</div>
+            <div>तहसील/तालुक/प्रखंड: Bhinai-03</div>
+            <div>नगर/गांव: Nagola-0021</div>
+            <div>वार्ड कोड: 0001</div>
+            <div>मकानसूचीकरण ब्लॉक नम्बर: 0003</div>
+        </div>
+
+        <!-- Expected Counts Section -->
+        <div style="text-align: center; margin-top: 30px;">
+            <h3 style="font-weight: bold; font-size: 18px;">नजरी नक्शे के अनुसार</h3>
+        </div>
+        
+        <div style="padding: 0 15px; margin-top: 15px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; font-size: 18px;">
+                <span>भवनों की अपेक्षित संख्या</span>
+                <input type="number" id="expected-buildings" style="width: 150px; padding: 5px; border: 1px solid #333;" value="60">
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; font-size: 18px;">
+                <span>जनगणना मकानों की अपेक्षित संख्या</span>
+                <input type="number" id="expected-houses" style="width: 150px; padding: 5px; border: 1px solid #333;" value="100">
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div style="padding: 0 15px; margin-bottom: 40px;">
+            <button type="button" class="nav-btn btn-filled" style="width: 100%; padding: 25px; border-radius: 50px; font-size: 20px; background: #ffcc80; color: #e65100; border: 2px solid #e65100;" onclick="saveLocationData()">मकानसूचीकरण कार्य</button>
+        </div>
+    </div>
+
+    <!-- Drawer Overlay -->
+    <div id="drawer-overlay" class="drawer-overlay" onclick="toggleDrawer()"></div>
+
+    <!-- Navigation Drawer -->
+    <div id="nav-drawer">
+        <div class="drawer-header-new">
+            <div class="user-profile">
+                <div class="user-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-id">et_99020017007_nidhi</div>
+                    <div class="user-role">
+                        Role: <br>
+                        <span style="font-size: 9px;">STATUTORY_TOWN_CHARGE_ENUMERATOR</span>
+                    </div>
+                </div>
+            </div>
+            <div class="drawer-stats">
+                SE आईडी डाउनलोड हुई: 0
+            </div>
+        </div>
+        
+        <div class="drawer-menu">
+            <a href="javascript:void(0)" class="drawer-item-new" onclick="showAbout()">
+                <i class="fas fa-info-circle"></i>
+                <span>ऐप के बारे में में</span>
+            </a>
+            <a href="password.html" class="drawer-item-new">
+                <i class="fas fa-ellipsis-h"></i>
+                <span>पासवर्ड परिवर्तन</span>
+            </a>
+            <a href="javascript:void(0)" class="drawer-item-new" onclick="showMap()">
+                <i class="fas fa-book-open"></i>
+                <span>एचएलबी मानचित्र</span>
+            </a>
+            <a href="#" class="drawer-item-new">
+                <i class="fas fa-question-circle"></i>
+                <span>सहायता केंद्र</span>
+            </a>
+            <a href="index.html" class="drawer-item-new" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>लॉग आउट</span>
+            </a>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function saveLocationData() {
+            const buildings = document.getElementById('expected-buildings').value;
+            const houses = document.getElementById('expected-houses').value;
+            
+            localStorage.setItem('census_expected_buildings', buildings);
+            localStorage.setItem('census_expected_houses', houses);
+            
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

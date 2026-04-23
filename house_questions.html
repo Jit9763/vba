@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - प्रश्नावली</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .confidential-text { color: #d32f2f; font-size: 14px; font-weight: bold; margin-top: 10px; text-align: center; }
+        .section-pill-new { background: #fff; color: #333; padding: 12px 20px; border-radius: 30px; font-size: 15px; font-weight: bold; border: 1.5px solid #000; margin: 20px auto; display: inline-block; text-align: center; min-width: 250px; }
+        .q-title { font-size: 18px; font-weight: bold; color: #000; margin: 15px 0 10px; line-height: 1.4; }
+        .opt-card-new { display: flex; align-items: center; padding: 12px 5px; background: #fff; cursor: pointer; }
+        .radio-circle { width: 24px; height: 24px; border: 2.5px solid #333; border-radius: 50%; margin-right: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .radio-circle.selected::after { content: ""; width: 12px; height: 12px; background: #333; border-radius: 50%; }
+        .opt-text { font-size: 17px; color: #333; font-weight: 500; }
+        .meta-info-row { display: flex; justify-content: space-between; padding: 0 15px; font-size: 12px; color: #666; margin-top: 5px; }
+        .bottom-nav-btns { display: flex; justify-content: space-around; padding: 15px; gap: 10px; background: white; border-top: 1px solid #eee; }
+        .nav-btn-orange { background: #f2994a; color: white; border: 1px solid #333; border-radius: 25px; padding: 12px 0; font-size: 16px; font-weight: 500; flex: 1; text-align: center; }
+        .q-desc { font-size: 13px; color: #888; margin-bottom: 15px; line-height: 1.4; }
+        .input-wrapper { position: relative; margin-top: 25px; margin-bottom: 15px; }
+        .input-label-top { position: absolute; top: -10px; left: 10px; background: white; padding: 0 5px; font-size: 11px; color: #666; z-index: 1; }
+        .yellow-link { color: #f2994a; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 8px; margin-top: 10px; cursor: pointer; text-decoration: none; }
+        .group-label { font-size: 14px; font-weight: bold; color: #000; margin-top: 15px; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <div class="app-container" style="background-color: white;">
+        <div class="header" style="background-color: #f2994a; height: 75px;">
+            <div class="header-left" style="margin-top: 10px;">
+                <a href="house_listing.html" class="icon-btn" style="font-size: 26px;">←</a>
+                <span style="font-size: 22px; font-weight: 500; margin-left: 15px;">एचएलओ डेटा</span>
+            </div>
+            <div class="header-right" style="margin-top: 10px;">
+                <a href="dashboard.html" class="icon-btn" style="font-size: 26px;"><i class="fas fa-home"></i></a>
+            </div>
+        </div>
+
+        <div class="confidential-text">भरने के पश्चात गोपनीय</div>
+        <div class="meta-info-row">
+            <span>लाइन क्रमांक: <span id="line-val">037</span></span>
+            <span>जनगणना मकान नम्बर: <span id="house-val">0036</span></span>
+        </div>
+
+        <div style="text-align: center;">
+            <div class="section-pill-new" id="current-section-pill">सामग्री विवरण</div>
+        </div>
+
+        <div id="q-content" style="padding: 0 20px; flex: 1; overflow-y: auto; padding-bottom: 120px;">
+            <div id="q-text" class="q-title"></div>
+            <div id="q-body"></div>
+        </div>
+
+        <div class="bottom-nav-btns">
+            <div class="nav-btn-orange" onclick="prevQ()">पिछला</div>
+            <div class="nav-btn-orange">सीधे जायें</div>
+            <div class="nav-btn-orange" onclick="nextQ()">अगला</div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        let currentIdx = 4;
+        const answers = {};
+
+        const questions = {
+            4: { section: "सामग्री विवरण", text: "4. जनगणना मकान के फर्श में प्रयुक्त प्रमुख सामग्री", type: "radio", options: ["1-मिट्टी", "2-लकड़ी/बांस", "3-पक्की ईंट", "4-पत्थर", "5-सीमेंट", "6-मोजेक/फर्श की टाइल", "7-अन्य कोई"] },
+            5: { section: "सामग्री विवरण", text: "5. जनगणना मकान की दीवार में प्रयुक्त प्रमुख सामग्री", type: "radio", options: ["1-घास/फूस/बांस आदि", "2-प्लास्टिक/पॉलीथीन", "3-मिट्टी/कच्ची ईंट", "4-लकड़ी", "5-पत्थर मसाला गारा के साथ नहीं", "6-पत्थर मसाला गारा के साथ", "7-जी.आई./धातु /एस्बेस्टस चादरें", "8-पक्की ईंट", "9-कंक्रीट", "0-अन्य कोई"] },
+            6: { section: "सामग्री विवरण", text: "6. जनगणना मकान की छत में प्रयुक्त प्रमुख सामग्री", type: "radio", options: ["1-घास/फूस/बांस/लकड़ी/मिट्टी आदि", "2-प्लास्टिक/पॉलीथीन", "3-हस्त निर्मित टाइल्स", "4-मशीन निर्मित टाइल्स", "5-पक्की ईंट", "6-पत्थर", "7-स्लेट", "8-जी.आई./धातु /एस्बेस्टस चादरें", "9-कंक्रीट", "0-अन्य कोई"] },
+            7: { section: "जनगणना मकान विवरण", text: "7. जनगणना मकान के उपयोग का पता लगायें", type: "radio_with_extras", options: ["1-आवास", "2-आवास-सह-अन्य उपयोग", "3-दुकान/कार्यालय", "4-स्कूल/कॉलेज आदि", "5-होटल/लॉज/गेस्ट हाउस आदि", "6-अस्पताल/डिस्पेंसरी आदि", "7-फैक्ट्री/वर्कशॉप/वर्क शेड आदि", "8-पूजा स्थल", "9-अन्य गैर-आवासीय उपयोग", "0-खाली"] },
+            8: { section: "जनगणना मकान विवरण", text: "8. जनगणना मकान की स्थिति", type: "radio", options: ["1-अच्छी", "2-रहने योग्य", "3-जीर्ण-शीर्ण"] },
+            9: { section: "परिवार के मुखिया से सम्बन्धित विवरण", text: "9. परिवार क्रमांक", type: "text", label: "परिवार क्रमांक", placeholder: "016" },
+            10: { section: "परिवार के मुखिया से सम्बन्धित विवरण", text: "10. इस परिवार में सामान्यतः रहने वाले व्यक्तियों की कुल संख्या", type: "number", label: "परिवार में सामान्यतः रहने वाले व्यक्तियों की कुल संख्या दर्ज करें", placeholder: "" },
+            11: { section: "परिवार के मुखिया से सम्बन्धित विवरण", text: "11. परिवार के मुखिया का नाम", type: "text", label: "नाम दर्ज करें", placeholder: "" },
+            12: { section: "परिवार के मुखिया से सम्बन्धित विवरण", text: "12. लिंग", type: "radio", options: ["1-पुरुष", "2-स्त्री", "3-ट्रांसजेंडर व्यक्ति"] },
+            13: { section: "परिवार के मुखिया से सम्बन्धित विवरण", text: "13. यदि अनुसूचित जाति/ अनुसूचित जनजाति या अन्य", type: "radio", desc: "अनुसूचित जाति केवल हिंदू, सिख और बौद्ध धर्म से हो सकती है। अनुसूचित जनजाति किसी भी धर्म से हो सकती है।", link: "एससी/एसटी सूची देखने के लिए यहां क्लिक करें", options: ["1-अनुसूचित जाति (SC)", "2-अनुसूचित जनजाति (ST)", "3-अन्य"] },
+            14: { section: "जनगणना मकान विवरण", text: "14. इस मकान के स्वामित्व की स्थिति", type: "radio", options: ["1-अपना", "2-किराये का परन्तु अन्यत्र अपना मकान", "3-किराये का एवं अन्यत्र कोई मकान नहीं", "4-अन्य कोई"] },
+            15: { section: "जनगणना मकान विवरण", text: "15. रहने योग्य उपलब्ध कमरों की संख्या", type: "number", label: "इस परिवार में रहने के लिए उपलब्ध कमरों की संख्या दर्ज करें", desc: "रसोईघर, स्नानघर, शौचालय, कोठरी (स्टोर), गलियारा और बरामदे को शामिल न करें। इसमें रहने का कमरा, शयनकक्ष, खाने (डाइनिंग) का कमरा, ड्राइंगरूम, अध्ययन कक्ष, नौकर का कमरा और इसी प्रकार के अन्य कमरों को शामिल करें।" },
+            16: { section: "जनगणना मकान विवरण", text: "16. इस परिवार में रहने वाले विवाहित दंपत्तियों की संख्या(0,1,2,3...)", type: "number", label: "विवाहित दंपत्तियों की संख्या दर्ज करें" },
+            17: { section: "परिवार को उपलब्ध सुविधायें", text: "17. पेयजल का मुख्य स्रोत", type: "radio", options: ["1-नल का पानी उपचारित स्रोत से", "2-नल का पानी अन-उपचारित स्रोत से", "3-कुआँ", "4-हैण्डपम्प", "5-ट्यूबवैल/बोरहोल", "6-झरना", "7-नदी/नहर", "8-टैंक/तालाब/झील", "9-सीलबंद पैकेट / बोतल का पानी", "0-अन्य स्रोत"] },
+            18: { section: "परिवार को उपलब्ध सुविधायें", text: "18.पेयजल स्रोत की उपलब्धता", desc: "यहाँ परिसर के निकट का अर्थ नगर के लिए 100 मीटर, ग्रामीण क्षेत्र के लिए 500 मीटर तक है।", type: "radio", options: ["1-परिसर के अन्दर", "2-परिसर के निकट", "3-दूर"] },
+            19: { section: "परिवार को उपलब्ध सुविधायें", text: "19. प्रकाश का मुख्य स्रोत", type: "radio", options: ["1-बिजली", "2-मिट्टी का तेल", "3-सौर ऊर्जा", "4-अन्य तेल", "5-अन्य", "6-प्रकाश रहित"] },
+            20: { section: "परिवार को उपलब्ध सुविधायें", text: "20. शौचालय की सुलभता", type: "radio_grouped", groups: [
+                { label: "हाँ", options: ["1-केवल परिवार के लिए", "2-अन्य परिवार के साथ साझे में", "3-सार्वजनिक शौचालय"] },
+                { label: "नहीं", options: ["4-खुले में"] }
+            ]},
+            21: { section: "परिवार को उपलब्ध सुविधायें", text: "21. शौचालय का प्रकार", type: "radio_grouped", groups: [
+                { label: "फ्लश/पोर-फ्लश शौचालय जुड़ी हुई", options: ["1-पाईप सीवर पद्धति", "2-सैप्टिक टैंक", "3-अन्य पद्धति"] },
+                { label: "दो गड्ढा शौचालय", options: ["4-स्लैब के साथ/उन्नत हवादार गड्ढा", "5-स्लैब के बिना/खुला गड्ढा"] },
+                { label: "एक गड्ढा शौचालय", options: ["6-स्लैब के साथ/उन्नत हवादार गड्ढा", "7-स्लैब के बिना/खुला गड्ढा"] },
+                { label: "सर्विस शौचालय", options: ["8-मानव मल-मूत्र व्यक्ति द्वारा हटाया जाता है", "9-मानव मल-मूत्र हटाने के लिए जानवरों का उपयोग", "0-मानव मल-मूत्र हटाने के लिए खुली नालियों का उपयोग"] }
+            ]},
+            22: { section: "परिवार को उपलब्ध सुविधायें", text: "22. गंदे पानी की निकासी किससे जुड़ी हुई है:", type: "radio", options: ["1-पाइप सीवर", "2-ढकी नाली", "3-खुली नाली", "4-किसी नाली से नहीं जुड़ी है"] },
+            23: { section: "परिवार को उपलब्ध सुविधायें", text: "23. परिसर के अन्दर स्नान सुविधा की उपलब्धता", type: "radio", options: ["1-स्नानगृह", "2-बिना छत वाला स्नानगृह", "3-परिसर के अन्दर नहीं है"] },
+            24: { section: "परिवार को उपलब्ध सुविधायें", text: "24. रसोई घर और एलपीजी/पीएनजी गैस कनेक्शन की उपलब्धता", type: "radio_grouped", groups: [
+                { label: "रसोई घर में खाना पकाते है", options: ["1-एलपीजी/पीएनजी गैस कनेक्शन उपलब्ध है", "2-एलपीजी/पीएनजी गैस कनेक्शन उपलब्ध नहीं है"] },
+                { label: "घर के भीतर खाना पकाते हैं परंतु रसोईघर में नहीं", options: ["3-एलपीजी/पीएनजी गैस कनेक्शन उपलब्ध है", "4-एलपीजी/पीएनजी गैस कनेक्शन उपलब्ध नहीं है"] },
+                { label: "खुले में/घर के बाहर खाना पकाते हैं", options: ["5-एलपीजी/पीएनजी गैस कनेक्शन उपलब्ध है", "6-एलपीजी/पीएनजी गैस कनेक्शन उपलब्ध नहीं है", "7-खाना नहीं पकाते"] }
+            ]},
+            25: { section: "परिवार को उपलब्ध सुविधायें", text: "25. खाना पकाने के लिए प्रयुक्त मुख्य ईंधन", type: "radio", options: ["1-एलपीजी/पीएनजी", "2-मिट्टी का तेल", "3-बिजली", "4-पक्का कोयला/लिग्नाइट/कच्चा कोयला", "5-लकड़ी", "6-उपले", "7-कृषि अवशेष", "8-सौर ऊर्जा", "9-अन्य कोई", "0-भोजन नहीं बनाया जाता"] },
+            26: { section: "परिवार द्वारा धारित परिसंपत्तियाँ", text: "26. रेडियो/ट्रांजिस्टर", type: "radio_grouped", groups: [
+                { label: "हाँ", options: ["1-परंपरागत रेडियो सेट", "2-मोबाइल/स्मार्टफोन पर", "3-अन्य किसी उपकरण पर"] },
+                { label: "नहीं", options: ["4-नहीं"] }
+            ]},
+            27: { section: "परिवार द्वारा धारित परिसंपत्तियाँ", text: "27. टेलीविजन", type: "radio_grouped", groups: [
+                { label: "हाँ", options: ["1-दूरदर्शन मुफ्त डिश", "2-अन्य डीटीएच/डिश", "3-केबल कनेक्शन", "4-अन्य कोई"] },
+                { label: "नहीं", options: ["5-नहीं"] }
+            ]},
+            28: { section: "परिवार द्वारा धारित परिसंपत्तियाँ", text: "28. इंटरनेट सुविधा", type: "radio_grouped", groups: [
+                { label: "हाँ", options: ["1-लैपटॉप/कंप्यूटर में", "2-मोबाइल/स्मार्टफोन में", "3-किसी अन्य उपकरण (डिवाइस) में"] },
+                { label: "नहीं", options: ["4-नहीं"] }
+            ]},
+            29: { section: "परिवार द्वारा धारित परिसंपत्तियाँ", text: "29. लैपटॉप/कम्प्यूटर", type: "radio", options: ["1-हाँ", "2-नहीं"] },
+            30: { section: "परिवार द्वारा धारित परिसंपत्तियाँ", text: "30. टेलीफोन और मोबाइलफोन/स्मार्टफोन", type: "radio_grouped", groups: [
+                { label: "हाँ", options: ["1-केवल लैंडलाइन"] },
+                { label: "केवल मोबाइल", options: ["2-स्मार्टफोन", "3-अन्य साधारण मोबाइल"] },
+                { label: "", options: ["4-दोनों"] },
+                { label: "नहीं", options: ["5-नहीं"] }
+            ]},
+            31: { section: "परिवार द्वारा धारित परिसंपत्तियाँ", text: "31. साईकिल और स्कूटर/मोटर साईकिल/मोपेड", type: "radio", options: ["1-साईकिल", "2-स्कूटर/मोटर साईकिल/मोपेड", "3-दोनों", "4-नहीं"] },
+            32: { section: "परिवार द्वारा धारित परिसंपत्तियाँ", text: "32. कार/जीप/वैन", type: "radio", options: ["1-हाँ", "2-नहीं"] },
+            33: { section: "परिवार को उपलब्ध सुविधायें", text: "33. परिवार द्वारा उपभोग किया जाने वाला मुख्य अनाज", type: "radio", options: ["1-गेहूँ", "2-चावल", "3-ज्वार", "4-बाजरा", "5-मक्का", "6-रागी", "7-जौ", "8-अन्य कोई"] },
+            34: { section: "परिवार को उपलब्ध सुविधायें", text: "34. मोबाइल नम्बर", type: "text", label: "मोबाइल नम्बर", placeholder: "10 अंकों का नम्बर" }
+        };
+
+        function renderQ() {
+            const q = questions[currentIdx] || { text: "प्रश्न " + currentIdx, section: "विवरण", type: "text", label: "उत्तर दें" };
+            document.getElementById('current-section-pill').innerText = q.section;
+            document.getElementById('q-text').innerText = q.text;
+            let html = "";
+            if (q.desc) html += `<div class="q-desc">${q.desc}</div>`;
+
+            if (q.type === "radio" || q.type === "radio_with_extras") {
+                q.options.forEach(opt => {
+                    const isSelected = answers['q' + currentIdx] === opt;
+                    html += `<div class="opt-card-new" onclick="selectOpt('${opt}')"><div class="radio-circle ${isSelected ? 'selected' : ''}"></div><span class="opt-text">${opt}</span></div>`;
+                });
+                if (q.link) html += `<div class="yellow-link"><i class="fas fa-play-circle"></i> ${q.link}</div>`;
+                if (q.type === "radio_with_extras") {
+                    html += `<input type="text" placeholder="वास्तविक उपयोग दर्ज करें" class="app-input" style="border: 1px solid #ccc; background: #f9f9f9; padding: 12px; margin: 15px 0; border-radius: 4px;">`;
+                    html += `<label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;"><input type="checkbox" style="width: 18px; height: 18px;"> लॉक है?</label>`;
+                    html += `<label style="display: flex; align-items: center; gap: 10px;"><input type="checkbox" style="width: 18px; height: 18px;"> संस्थागत है?</label>`;
+                }
+            } else if (q.type === "radio_grouped") {
+                q.groups.forEach(g => {
+                    if (g.label) html += `<div class="group-label">${g.label}</div>`;
+                    g.options.forEach(opt => {
+                        const isSelected = answers['q' + currentIdx] === opt;
+                        html += `<div class="opt-card-new" onclick="selectOpt('${opt}')"><div class="radio-circle ${isSelected ? 'selected' : ''}"></div><span class="opt-text">${opt}</span></div>`;
+                    });
+                });
+            } else {
+                const val = answers['q' + currentIdx] || "";
+                html += `<div class="input-wrapper"><div class="input-label-top">${q.label}</div><input type="${q.type}" id="q-val" class="app-input" value="${val}" placeholder="${q.placeholder || ''}" style="border: 1.5px solid #ccc; padding: 15px; border-radius: 4px;"></div>`;
+            }
+            document.getElementById('q-body').innerHTML = html;
+            
+            document.getElementById('line-val').innerText = getFormState('line') || '037';
+            document.getElementById('house-val').innerText = getFormState('q2') || '0036';
+        }
+
+        function selectOpt(val) { answers['q' + currentIdx] = val; renderQ(); }
+        function saveAnswer() {
+            const q = questions[currentIdx]; if (!q) return;
+            if (q.type.startsWith("radio")) return;
+            const input = document.getElementById('q-val'); if (input) answers['q' + currentIdx] = input.value;
+        }
+        function nextQ() { saveAnswer(); if (currentIdx < 34) { currentIdx++; renderQ(); } else { setFormState('answers', answers); window.location.href = 'house_review.html'; } }
+        function prevQ() { saveAnswer(); if (currentIdx > 4) { currentIdx--; renderQ(); } else { window.location.href = 'house_listing.html'; } }
+        window.onload = renderQ;
+    </script>
+</body>
+</html>

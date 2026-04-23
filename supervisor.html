@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - Supervisor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="header-left">
+                <a href="dashboard.html" class="icon-btn">←</a>
+                <span>Paryavekshak Portal</span>
+            </div>
+        </div>
+        
+        <div style="padding: 20px;">
+            <h4>प्रगणक कार्य समीक्षा (Review)</h4>
+            <div id="pending-list" style="background: white; border: 1px solid #eee; border-radius: 8px; overflow: hidden;">
+                <!-- List will be populated via JS -->
+                <div style="padding: 20px; text-align: center; color: #999;">कोई लंबित डेटा नहीं है।</div>
+            </div>
+        </div>
+
+        <!-- Modal for detail -->
+        <div id="modal-container" class="modal">
+            <div class="modal-content">
+                <h3 id="modal-title">Review Data</h3>
+                <p id="modal-body" style="margin: 15px 0; color: var(--text-gray); white-space: pre-wrap; font-size: 12px;"></p>
+                <div id="modal-progress" style="display:none; width: 100%; height: 8px; background: #eee; border-radius: 5px; overflow: hidden; margin: 15px 0;">
+                    <div id="modal-progress-bar" style="width: 0%; height: 100%; background: var(--primary-orange); transition: width 0.1s;"></div>
+                </div>
+                <button class="nav-btn nav-btn-primary" style="width: 100%;" onclick="approveAndSync()">स्वीकृत करें और सिंक करें</button>
+                <button class="nav-btn" style="width: 100%; margin-top: 10px;" onclick="closeModal()">रद्द करें</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        const pending = getPendingRecords();
+        const listContainer = document.getElementById('pending-list');
+
+        if (pending.length > 0) {
+            listContainer.innerHTML = '';
+            pending.forEach((rec, idx) => {
+                const item = document.createElement('div');
+                item.className = 'drawer-item';
+                item.style.display = 'flex';
+                item.style.justifyContent = 'space-between';
+                item.innerHTML = `<span>👤 Record #${idx+1} (${rec.q10 || 'Unknown Head'})</span><span style="color:var(--primary-orange)">Review →</span>`;
+                item.onclick = () => showDetail(idx);
+                listContainer.appendChild(item);
+            });
+        }
+
+        let activeIdx = -1;
+        function showDetail(idx) {
+            activeIdx = idx;
+            const rec = pending[idx];
+            document.getElementById('modal-title').innerText = "Record review: " + (rec.q10 || "N/A");
+            document.getElementById('modal-body').innerText = JSON.stringify(rec, null, 2).substring(0, 500) + "...";
+            document.getElementById('modal-container').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal-container').style.display = 'none';
+        }
+
+        function approveAndSync() {
+            const progress = document.getElementById('modal-progress');
+            const bar = document.getElementById('modal-progress-bar');
+            
+            progress.style.display = 'block';
+            
+            // Simulation of fetch
+            let x = 0;
+            const interval = setInterval(() => {
+                x += 10;
+                bar.style.width = x + '%';
+                if(x >= 100) {
+                    clearInterval(interval);
+                    clearPendingRecords(); // Clear all for simulation
+                    alert("डेटा सफलतापूर्वक Google Sheets में भेजा गया!");
+                    window.location.href = 'dashboard.html';
+                }
+            }, 100);
+        }
+    </script>
+</body>
+</html>

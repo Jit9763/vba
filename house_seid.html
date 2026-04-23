@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - SE ID</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container" style="background-color: white;">
+        <div class="header" style="background-color: #f2994a; height: 70px;">
+            <div class="header-left">
+                <a href="house_listing.html" class="icon-btn">←</a>
+                <span>SE ID प्रविष्टि</span>
+            </div>
+        </div>
+
+        <div style="padding: 20px;">
+            <div class="question-text">12 अंकों की SE ID भरें</div>
+            <input type="text" id="seid-input" maxlength="12" class="app-input" placeholder="ABC123456789" style="font-size: 20px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 30px;">
+            
+            <div class="question-text">7. जनगणना मकान का उपयोग</div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; padding: 10px; background: #f9f9f9; border-radius: 8px; margin-bottom: 10px;">
+                    <input type="radio" name="q7" value="1-आवास" checked> निवास (Residential)
+                </label>
+                <label style="display: block; padding: 10px; background: #f9f9f9; border-radius: 8px;">
+                    <input type="radio" name="q7" value="2-निवास सह अन्य उपयोग"> निवास सह अन्य उपयोग
+                </label>
+            </div>
+
+            <div class="question-text">9. परिवार संख्या (स्वचालित)</div>
+            <input type="text" value="001" readonly class="app-input" style="background: #eee; margin-bottom: 40px;">
+
+            <button type="button" class="nav-btn" onclick="saveAndGo()" style="background: #f2994a; color: white; border: none; width: 100%; padding: 15px; border-radius: 25px; font-weight: bold;">अगला (समीक्षा)</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function saveAndGo() {
+            const seid = document.getElementById('seid-input').value;
+            if (seid.length < 12) {
+                alert("कृपया 12 अंकों की वैध SE ID भरें");
+                return;
+            }
+            setFormState('seid', seid);
+            setFormState('useSEID', true);
+            window.location.href = 'house_review.html';
+        }
+    </script>
+</body>
+</html>

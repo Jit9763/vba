@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - पूर्ण के रूप में चिह्नित करें</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .finish-header { font-size: 16px; font-weight: bold; color: #333; text-align: left; padding: 20px 20px 10px; }
+        .declaration-box {
+            display: flex;
+            padding: 0 20px;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .declaration-text { font-size: 11px; color: #333; line-height: 1.6; text-align: justify; }
+        
+        #sig-canvas {
+            border: 1px solid #ccc;
+            background: #fff;
+            width: 90%;
+            height: 350px;
+            margin: 0 auto;
+            display: block;
+            border-radius: 4px;
+            touch-action: none;
+        }
+        
+        .finish-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            margin-top: 20px;
+            align-items: center;
+        }
+        
+        .btn-clear {
+            border: 1px solid #ccc;
+            background: #fff;
+            color: #333;
+            border-radius: 20px;
+            padding: 8px 25px;
+            font-size: 14px;
+        }
+        
+        .btn-submit-grey {
+            background: #ddd;
+            color: #888;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 35px;
+            font-size: 14px;
+            cursor: not-allowed;
+        }
+        
+        .btn-submit-active {
+            background: #f2994a;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container" style="background-color: #f5f5f5;">
+        <div class="header" style="background-color: #f2994a; height: 70px;">
+            <div class="header-left">
+                <a href="dashboard.html" class="icon-btn" style="font-size: 24px;">←</a>
+                <span style="font-size: 18px; font-weight: 500; margin-left: 15px;">एचएलओ ऐप</span>
+            </div>
+            <div class="header-right">
+                <a href="dashboard.html" class="icon-btn" style="font-size: 24px;"><i class="fas fa-home"></i></a>
+            </div>
+        </div>
+
+        <div class="finish-header">क्या इस एचएलबी का कार्य पूर्ण हो गया है?</div>
+
+        <div class="declaration-box">
+            <input type="checkbox" id="confirm-check" onchange="toggleSubmit()" style="width: 20px; height: 20px; flex-shrink: 0; margin-top: 3px;">
+            <div class="declaration-text">
+                मैं, इस एचएलबी में मकानसूचीकरण कार्य पूर्ण होने की पुष्टि करता हूं। यह भी प्रमाणित किया जाता है कि इस एचएलबी में न तो कोई संरचना और न ही कोई परिवार गणना के लिए शेष है।
+            </div>
+        </div>
+
+        <canvas id="sig-canvas"></canvas>
+
+        <div class="finish-footer">
+            <button class="btn-clear" onclick="clearSig()">क्लियर करें</button>
+            <button class="btn-submit-grey" id="submit-btn" onclick="submitFinal()">सबमिट करें</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        const canvas = document.getElementById('sig-canvas');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+        let sigDone = false;
+
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function startDrawing(e) {
+            drawing = true;
+            sigDone = true;
+            draw(e);
+            toggleSubmit();
+        }
+        function endDrawing() {
+            drawing = false;
+            ctx.beginPath();
+        }
+        function draw(e) {
+            if (!drawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(x, y);
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', endDrawing);
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); });
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+        canvas.addEventListener('touchend', endDrawing);
+
+        function clearSig() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            sigDone = false;
+            toggleSubmit();
+        }
+
+        function toggleSubmit() {
+            const checked = document.getElementById('confirm-check').checked;
+            const btn = document.getElementById('submit-btn');
+            if (checked && sigDone) {
+                btn.classList.add('btn-submit-active');
+                btn.disabled = false;
+            } else {
+                btn.classList.remove('btn-submit-active');
+                btn.disabled = true;
+            }
+        }
+
+        function submitFinal() {
+            const pending = getPendingRecords();
+            if (pending.length > 0) {
+                alert("कुछ डेटा अभी भी सिंक होना बाकी है। कृपया पहले 'सिंक करें' पर क्लिक करें।");
+                return;
+            }
+
+            localStorage.setItem('eb_completed_0003', 'true');
+            alert("एचएलबी सफलतापूर्वक पूरा हुआ!");
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

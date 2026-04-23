@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLO Portal - Synced Data</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="header-left">
+                <a href="dashboard.html" class="icon-btn">←</a>
+                <span>सिंक किया गया डेटा</span>
+            </div>
+        </div>
+        <div style="padding: 15px;" id="records-list">
+            <!-- Dynamic records will appear here -->
+        </div>
+        <p style="font-size: 11px; text-align: center; color: var(--text-gray); margin-top: 20px;">
+            * केवल पिछले 7 दिनों का डेटा यहाँ उपलब्ध है।
+        </p>
+
+        <!-- Detail Modal -->
+        <div id="modal-container" class="modal">
+            <div class="modal-content">
+                <h3 id="m-name">Manoj Gupta</h3>
+                <div style="text-align: left; font-size: 13px; margin: 20px 0;">
+                    <p><b>मकान संख्या:</b> <span id="m-house">32/B</span></p>
+                    <p><b>सिंक तिथि:</b> <span id="m-date">21-10-2023</span></p>
+                    <p><b>स्थिति:</b> Approved ✅</p>
+                </div>
+                <button class="nav-btn nav-btn-primary" style="width: 100%;" onclick="goToEdit()">रिकॉर्ड सुधारें (Edit)</button>
+                <button class="nav-btn" style="width: 100%; margin-top: 10px;" onclick="closeModal()">वापस जाएँ</button>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+    <script>
+        window.onload = renderRecords;
+
+        function renderRecords() {
+            const list = document.getElementById('records-list');
+            const synced = getSyncedRecords();
+            
+            if (synced.length === 0) {
+                list.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">कोई सिंक किया गया डेटा नहीं मिला।</p>';
+                return;
+            }
+
+            list.innerHTML = synced.map(r => `
+                <div class="record-card" onclick="showRecordDetail('${r.id}', '${r.answers.q11}', '${r.answers.q3}', '${r.date}')">
+                    <div class="record-title">मकान: ${r.answers.q3} | ${r.answers.q11}</div>
+                    <div class="record-meta">सिंक तिथि: ${r.date} | स्थिति: Approved ✅</div>
+                </div>
+            `).join('');
+        }
+
+        let currentEditingId = '';
+
+        function showRecordDetail(id, name, house, date) {
+            document.getElementById('m-name').innerText = name;
+            document.getElementById('m-house').innerText = house;
+            document.getElementById('m-date').innerText = date;
+            currentEditingId = id;
+            document.getElementById('modal-container').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal-container').style.display = 'none';
+        }
+
+        function goToEdit() {
+            window.location.href = `house_review.html?edit=${currentEditingId}`;
+        }
+    </script>
+</body>
+</html>
