@@ -1,5 +1,5 @@
 // Global Configurations
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwm8kRsJJwjNToMqIoTX3stVhHN9SYfDvdsINkMjHwnOhGmWzG5lv1-dsPivYmvCbP9/exec";
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIklyxI40hZHr5Q8HRsyJ5381z8CMOwe_clj7fh3DSamYPHdPKWt88hqUucTFeGaS0/exec';
 
 // User Session Management
 function getCurrentUser() {
@@ -138,8 +138,9 @@ async function savePendingRecord(answers, editIndex = null) {
         localStorage.setItem(storageKey, JSON.stringify(records));
         localStorage.setItem('census_pending_records_backup', JSON.stringify(records));
         
-        // Background sync
+        // AUTO-SYNC: Push to Google Sheet immediately without needing a button
         syncToGoogleSheet([newRecord]);
+        
         return true;
     } catch (e) {
         console.error("Save Error:", e);
@@ -154,6 +155,21 @@ function syncToGoogleSheet(records) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(records)
     }).catch(err => console.warn("Background sync failed."));
+}
+
+async function autoFetchCloudData() {
+    try {
+        const res = await fetch(SCRIPT_URL);
+        const json = await res.json();
+        if (json.status === 'success' && json.data && json.data.length > 0) {
+            localStorage.setItem('census_synced_records_e001', JSON.stringify(json.data));
+            console.log("Cloud Auto-Sync Complete: Fetched " + json.data.length + " records.");
+            return true;
+        }
+    } catch(err) {
+        console.warn("Cloud auto-fetch failed:", err);
+    }
+    return false;
 }
 
 // Census Numbering Logic

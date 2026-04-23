@@ -82,8 +82,12 @@
     <script>
         let selectedRecord = null;
 
-        function loadLines() {
+        async function loadLines() {
             renderDrawer(); // Add hamburger menu
+            
+            // AUTO-FETCH: Check cloud for latest real-time data silently
+            await autoFetchCloudData();
+            
             let enumId = getFormState('selected_enumerator_id') || 'e001';
             enumId = enumId.toLowerCase() === 'e001' ? 'e001' : enumId;
             const mockData = getSupervisorMockData()[enumId];
