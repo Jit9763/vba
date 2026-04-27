@@ -419,6 +419,13 @@
                 } else if (useSEID) {
                     const q = mockData.find(item => item.id === i);
                     if (q) val = q.val;
+                } else {
+                    // Normal flow mapping
+                    if (i === 1) val = currentLine;
+                    else if (i === 2) val = currentBuilding;
+                    else if (i === 3) val = currentHouse;
+                    else if (i === 9) val = "001"; // Placeholder for family sl no
+                    else val = currentAnswers['q'+i] || val;
                 }
                 reviewItems.push({ id: i, text: labels[i], val: val });
             }

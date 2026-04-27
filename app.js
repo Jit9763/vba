@@ -39,12 +39,16 @@ function getSyncedRecords() {
         };
 
         dummyPeople.forEach((p, i) => {
-            const bNo = (i+1).toString().padStart(4, '0');
+            const num = (i + 1).toString();
+            const bNo = num.padStart(4, '0');
+            const hNo = num.padStart(4, '0');
+            const lNo = num.padStart(3, '0');
+            
             dummyData.push({
-                id: 'REC-DUMMY-' + (i+1).toString().padStart(3, '0'),
-                q1: bNo, q2: "0001", line: (i+1).toString().padStart(3, '0'),
+                id: 'REC-DUMMY-' + lNo,
+                q1: bNo, q2: hNo, line: lNo,
                 date: today, status: 'Approved',
-                answers: { ...baseAnswers, q1: bNo, q2: "0001", q3: "0001", q9: "001", q10: p.members, q11: p.name }
+                answers: { ...baseAnswers, q1: bNo, q2: hNo, q3: hNo, q9: lNo, q10: p.members, q11: p.name }
             });
         });
     }
@@ -177,9 +181,14 @@ async function autoFetchCloudData() {
 
 // Census Numbering Logic
 function getNextLineNumber() {
-    const records = getPendingRecords();
-    const synced = getSyncedRecords();
-    return (records.length + synced.length + 1).toString().padStart(3, '0');
+    const all = [...getSyncedRecords(), ...getPendingRecords()];
+    if (all.length === 0) return '001';
+    let max = 0;
+    all.forEach(r => {
+        const n = parseInt(r.line || (r.answers ? r.answers.line : 0));
+        if (!isNaN(n) && n > max) max = n;
+    });
+    return (max + 1).toString().padStart(3, '0');
 }
 
 function getNextBuildingNumber() {
@@ -202,6 +211,20 @@ function getNextHouseNumber() {
         if (!isNaN(n) && n > max) max = n;
     });
     return (max + 1).toString().padStart(4, '0');
+}
+
+function getNextFamilyNumber(houseNo) {
+    const all = [...getSyncedRecords(), ...getPendingRecords()];
+    if (!houseNo) return '001';
+    let max = 0;
+    all.forEach(r => {
+        const h = r.q2 || (r.answers ? r.answers.q2 : '');
+        if (h === houseNo) {
+            const n = parseInt(r.answers?.q9 || 0);
+            if (!isNaN(n) && n > max) max = n;
+        }
+    });
+    return (max + 1).toString().padStart(3, '0');
 }
 
 // State Management

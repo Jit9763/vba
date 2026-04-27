@@ -119,14 +119,25 @@
             const all = [...synced, ...pending];
             
             // Calculate Stats
-            const totalHouses = new Set(all.map(r => r.answers?.q2 || r.house_no)).size;
+            const totalHouses = new Set(all.map(r => r.answers?.q2 || r.q2 || r.house_no)).size;
+            
             const nonRes = all.filter(r => {
-                const use = r.answers?.q7 || "";
-                return use && !use.includes("1-आवास") && !use.includes("2-आवास-सह-अन्य उपयोग");
+                let q7 = String(r.answers?.q7 || r.q7 || "").trim();
+                if (!q7) return false;
+                // Standard Census: 1 (Residential) and 2 (Residential-cum-other) are residential
+                const isResidential = q7.startsWith("1") || q7.startsWith("2") || q7.includes("आवास");
+                return !isResidential;
             }).length;
             
-            const institutional = all.filter(r => r.answers?.is_institutional).length;
-            const normalFamilies = all.length - institutional;
+            const institutional = all.filter(r => r.answers?.is_institutional || r.is_institutional || String(r.answers?.q7 || "").includes("संस्थागत")).length;
+            
+            // Normal families = Total records - Non-residential - Institutional
+            const normalFamilies = all.filter(r => {
+                let q7 = String(r.answers?.q7 || r.q7 || "").trim();
+                const isRes = q7.startsWith("1") || q7.startsWith("2") || q7.includes("आवास");
+                const isInst = r.answers?.is_institutional || r.is_institutional || q7.includes("संस्थागत");
+                return isRes && !isInst;
+            }).length;
 
             // Update DOM Stats
             document.getElementById('stat-total-houses').innerText = totalHouses.toString().padStart(4, '0');

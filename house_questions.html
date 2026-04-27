@@ -69,7 +69,7 @@
             6: { section: "सामग्री विवरण", text: "6. जनगणना मकान की छत में प्रयुक्त प्रमुख सामग्री", type: "radio", options: ["1-घास/फूस/बांस/लकड़ी/मिट्टी आदि", "2-प्लास्टिक/पॉलीथीन", "3-हस्त निर्मित टाइल्स", "4-मशीन निर्मित टाइल्स", "5-पक्की ईंट", "6-पत्थर", "7-स्लेट", "8-जी.आई./धातु /एस्बेस्टस चादरें", "9-कंक्रीट", "0-अन्य कोई"] },
             7: { section: "जनगणना मकान विवरण", text: "7. जनगणना मकान के उपयोग का पता लगायें", type: "radio_with_extras", options: ["1-आवास", "2-आवास-सह-अन्य उपयोग", "3-दुकान/कार्यालय", "4-स्कूल/कॉलेज आदि", "5-होटल/लॉज/गेस्ट हाउस आदि", "6-अस्पताल/डिस्पेंसरी आदि", "7-फैक्ट्री/वर्कशॉप/वर्क शेड आदि", "8-पूजा स्थल", "9-अन्य गैर-आवासीय उपयोग", "0-खाली"] },
             8: { section: "जनगणना मकान विवरण", text: "8. जनगणना मकान की स्थिति", type: "radio", options: ["1-अच्छी", "2-रहने योग्य", "3-जीर्ण-शीर्ण"] },
-            9: { section: "परिवार के मुखिया से सम्बन्धित विवरण", text: "9. परिवार क्रमांक", type: "text", label: "परिवार क्रमांक", placeholder: "016" },
+            9: { section: "परिवार के मुखिया से सम्बन्धित विवरण", text: "9. परिवार क्रमांक", type: "text", label: "परिवार क्रमांक", placeholder: "001" },
             10: { section: "परिवार के मुखिया से सम्बन्धित विवरण", text: "10. इस परिवार में सामान्यतः रहने वाले व्यक्तियों की कुल संख्या", type: "number", label: "परिवार में सामान्यतः रहने वाले व्यक्तियों की कुल संख्या दर्ज करें", placeholder: "" },
             11: { section: "परिवार के मुखिया से सम्बन्धित विवरण", text: "11. परिवार के मुखिया का नाम", type: "text", label: "नाम दर्ज करें", placeholder: "" },
             12: { section: "परिवार के मुखिया से सम्बन्धित विवरण", text: "12. लिंग", type: "radio", options: ["1-पुरुष", "2-स्त्री", "3-ट्रांसजेंडर व्यक्ति"] },
@@ -168,10 +168,11 @@
         function nextQ() { 
             saveAnswer(); 
             
-            // Branching Logic for Q7: If not '1-आवास', skip to Q34 (Mobile Number)
+            // Branching Logic for Q7: If not residential (1 or 2), skip to Q34 (Mobile Number)
             if (currentIdx === 7) {
-                const q7Val = answers['q7'];
-                if (q7Val && q7Val !== "1-आवास") {
+                const q7Val = answers['q7'] || "";
+                const isResidential = q7Val.startsWith("1") || q7Val.startsWith("2") || q7Val.includes("आवास");
+                if (q7Val && !isResidential) {
                     currentIdx = 34;
                     renderQ();
                     return;
@@ -184,10 +185,11 @@
         function prevQ() { 
             saveAnswer(); 
             
-            // Branching Logic Backwards: If Q7 was not '1-आवास', go back from 34 to 7
+            // Branching Logic Backwards: If Q7 was not residential, go back from 34 to 7
             if (currentIdx === 34) {
-                const q7Val = answers['q7'];
-                if (q7Val && q7Val !== "1-आवास") {
+                const q7Val = answers['q7'] || "";
+                const isResidential = q7Val.startsWith("1") || q7Val.startsWith("2") || q7Val.includes("आवास");
+                if (q7Val && !isResidential) {
                     currentIdx = 7;
                     renderQ();
                     return;

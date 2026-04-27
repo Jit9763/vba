@@ -189,6 +189,11 @@
             answers.q2 = currentHouse;
             answers.q3 = currentHouse;
             answers.line = currentLine;
+            
+            // Auto-calculate family number if not already set
+            const famNo = getNextFamilyNumber(currentHouse);
+            answers.q9 = famNo;
+            
             setFormState('answers', answers);
             
             document.getElementById('seid-modal').style.display = 'flex';

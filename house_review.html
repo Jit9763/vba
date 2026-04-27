@@ -84,12 +84,32 @@
         function renderPart(part) {
             currentPart = part;
             const list = document.getElementById('review-list');
+            // NON-RESIDENTIAL FILTER: Skip 8-33 if Q7 is not Residential (1 or 2)
+            const q7Val = String(currentAnswers.q7 || "").trim();
+            const isResidential = q7Val.startsWith("1") || q7Val.startsWith("2") || q7Val.includes("आवास");
+            const isNonResidential = q7Val && !isResidential;
+            
+            if (isNonResidential && (part === 2 || part === 3)) {
+                // Skip these parts for non-residential
+                renderPart(part + 1);
+                return;
+            }
+
             const ranges = { 1: [1, 10], 2: [11, 22], 3: [23, 32], 4: [33, 34] };
             const [start, end] = ranges[part];
 
             let html = "";
             for (let i = start; i <= end; i++) {
-                const val = currentAnswers['q' + i] || "डेटा उपलब्ध नहीं";
+                // If non-residential, only show 1-7 and 34
+                if (isNonResidential && i > 7 && i < 34) continue;
+
+                let val = "डेटा उपलब्ध नहीं";
+                if (i === 1) val = currentAnswers.line || currentAnswers.q1;
+                else if (i === 2) val = currentAnswers.q1;
+                else if (i === 3) val = currentAnswers.q2 || currentAnswers.q3;
+                else if (i === 9) val = currentAnswers.q9 || "001";
+                else val = currentAnswers['q' + i] || val;
+
                 html += `
                     <div class="review-card" style="background: #e3f2fd; border: 1px solid #bbdefb; border-radius: 12px; padding: 15px; margin-bottom: 12px; cursor: pointer;" onclick="editItem(${i})">
                         <div style="font-size: 13px; font-weight: bold; color: #333; margin-bottom: 5px;">${i}. ${labels[i]}</div>
@@ -100,7 +120,11 @@
             list.innerHTML = html;
             list.scrollTop = 0;
 
-            document.getElementById('btn-confirm').innerText = part < 4 ? "पुष्टि करें (Next)" : "पुष्टि करें (Submit)";
+            // If non-residential, part 1 is followed by part 4 (which is the last part)
+            const isLastPart = (part === 4) || (isNonResidential && part === 1 && !ranges[2] && !ranges[3]); 
+            // Actually simpler:
+            const nextLabel = (part < 4) ? "पुष्टि करें (Next)" : "पुष्टि करें (Submit)";
+            document.getElementById('btn-confirm').innerText = nextLabel;
             document.getElementById('btn-cancel').innerText = part > 1 ? "पिछला" : "रद्द करें";
         }
 
