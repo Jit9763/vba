@@ -171,7 +171,7 @@
             // Branching Logic for Q7: If not residential (1 or 2), skip to Q34 (Mobile Number)
             if (currentIdx === 7) {
                 const q7Val = answers['q7'] || "";
-                const isResidential = q7Val.startsWith("1") || q7Val.startsWith("2") || q7Val.includes("आवास");
+                const isResidential = /^[12]/.test(q7Val) || q7Val.includes("आवास");
                 if (q7Val && !isResidential) {
                     currentIdx = 34;
                     renderQ();
@@ -188,7 +188,7 @@
             // Branching Logic Backwards: If Q7 was not residential, go back from 34 to 7
             if (currentIdx === 34) {
                 const q7Val = answers['q7'] || "";
-                const isResidential = q7Val.startsWith("1") || q7Val.startsWith("2") || q7Val.includes("आवास");
+                const isResidential = /^[12]/.test(q7Val) || q7Val.includes("आवास");
                 if (q7Val && !isResidential) {
                     currentIdx = 7;
                     renderQ();

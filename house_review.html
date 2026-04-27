@@ -86,7 +86,7 @@
             const list = document.getElementById('review-list');
             // NON-RESIDENTIAL FILTER: Skip 8-33 if Q7 is not Residential (1 or 2)
             const q7Val = String(currentAnswers.q7 || "").trim();
-            const isResidential = q7Val.startsWith("1") || q7Val.startsWith("2") || q7Val.includes("आवास");
+            const isResidential = /^[12]/.test(q7Val) || q7Val.includes("आवास");
             const isNonResidential = q7Val && !isResidential;
             
             if (isNonResidential && (part === 2 || part === 3)) {
