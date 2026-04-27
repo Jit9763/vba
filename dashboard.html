@@ -93,7 +93,8 @@
         
         // Show Supervisor-only sections
         if (user.role === 'supervisor') {
-            const grid = document.querySelector('.dashboard-grid');
+            const isS001 = user.id.toLowerCase() === 's001' || user.id.toLowerCase() === 'e001';
+            const enumCount = isS001 ? 6 : 0;
             const supervisorCard = `
                 <a href="supervisor.html" class="menu-card" style="border: 2px solid #9b59b6; grid-column: span 2;">
                     <div class="icon-circle" style="background-color: #f3e5f5; color: #9b59b6; width: 60px; height: 60px;">
@@ -101,7 +102,7 @@
                     </div>
                     <div style="text-align: left; flex: 1; margin-left: 15px;">
                         <span class="menu-label" style="font-size: 16px; font-weight: bold;">प्रगणक कार्य समीक्षा (Review)</span>
-                        <p style="font-size: 11px; color: #666; margin-top: 5px;">6 प्रगणकों का डेटा समीक्षा के लिए उपलब्ध है</p>
+                        <p style="font-size: 11px; color: #666; margin-top: 5px;">${enumCount} प्रगणकों का डेटा समीक्षा के लिए उपलब्ध है</p>
                     </div>
                 </a>
             `;

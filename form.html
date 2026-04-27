@@ -177,7 +177,10 @@
             }
 
             let uniqueBuildings = [...new Set(allRecords.map(r => r.q1))];
-            if (uniqueBuildings.length === 0) {
+            const user = getCurrentUser();
+            const isPrefillUser = ['e001', 's001'].includes(user.id.toLowerCase());
+
+            if (uniqueBuildings.length === 0 && isPrefillUser) {
                 for (let i = 1; i <= 37; i++) uniqueBuildings.push(i.toString().padStart(4, '0'));
                 currentBuilding = "0038";
             } else {
@@ -199,10 +202,13 @@
         }
 
         function repeatBuilding() {
-            const records = getPendingRecords();
-            if (records.length > 0) {
+            const pending = getPendingRecords();
+            const synced = getSyncedRecords();
+            const all = [...synced, ...pending];
+            
+            if (all.length > 0) {
                 isRepeated = true;
-                currentBuilding = records[records.length - 1].q1;
+                currentBuilding = all[all.length - 1].q1;
                 document.getElementById('building-select').value = currentBuilding;
                 document.getElementById('building-input-hidden').value = currentBuilding;
                 alert("भवन नंबर दोहराया गया: " + currentBuilding);
@@ -371,7 +377,14 @@
         function getMockReviewData() {
             const user = getCurrentUser();
             const stored = localStorage.getItem('census_mock_review_data_' + user.id);
-            return stored ? JSON.parse(stored) : defaultMockData;
+            if (stored) return JSON.parse(stored);
+            
+            const isPrefillUser = ['e001', 's001'].includes(user.id.toLowerCase());
+            if (!isPrefillUser) {
+                // Return empty values for unauthorized users
+                return defaultMockData.map(item => ({ ...item, val: "" }));
+            }
+            return defaultMockData;
         }
 
         function saveMockReviewData(data) {

@@ -16,35 +16,38 @@ function getSyncedRecords() {
     const manualData = localStorage.getItem(syncedKey);
     let manualRecords = manualData ? JSON.parse(manualData) : [];
     
-    // Always generate the 15 core training records
+    // Only generate the 15 core training records for e001 and s001
     const dummyData = [];
-    const today = new Date().toLocaleDateString('hi-IN');
-    const dummyPeople = [
-        {name: "Manoj", members: "5"}, {name: "Rajesh", members: "4"},
-        {name: "Suman", members: "3"}, {name: "Prakash", members: "6"},
-        {name: "Amit", members: "5"}, {name: "Suresh", members: "4"},
-        {name: "Kiran", members: "2"}, {name: "Anita", members: "5"},
-        {name: "Sunil", members: "3"}, {name: "Meena", members: "4"},
-        {name: "Vijay", members: "6"}, {name: "Radha", members: "5"},
-        {name: "Deepak", members: "4"}, {name: "Geeta", members: "3"},
-        {name: "Rahul", members: "5"}
-    ];
+    const validDummyUsers = ['e001', 's001'];
+    if (validDummyUsers.includes(user.id.toLowerCase())) {
+        const today = new Date().toLocaleDateString('hi-IN');
+        const dummyPeople = [
+            {name: "Manoj", members: "5"}, {name: "Rajesh", members: "4"},
+            {name: "Suman", members: "3"}, {name: "Prakash", members: "6"},
+            {name: "Amit", members: "5"}, {name: "Suresh", members: "4"},
+            {name: "Kiran", members: "2"}, {name: "Anita", members: "5"},
+            {name: "Sunil", members: "3"}, {name: "Meena", members: "4"},
+            {name: "Vijay", members: "6"}, {name: "Radha", members: "5"},
+            {name: "Deepak", members: "4"}, {name: "Geeta", members: "3"},
+            {name: "Rahul", members: "5"}
+        ];
 
-    const baseAnswers = {
-        "q4": "1-मिट्टी", "q5": "1-घास/फूस/बांस आदि", "q6": "1-घास/फूस/बांस/लकड़ी/मिट्टी आदि",
-        "q7": "1-आवास", "q8": "1-अच्छी", "q12": "1-पुरुष", "q13": "1-अनुसूचित जाति (SC)",
-        "q14": "1-अपना", "q15": "3", "q16": "2", "q17": "1-नल का पानी उपचारित स्रोत से"
-    };
+        const baseAnswers = {
+            "q4": "1-मिट्टी", "q5": "1-घास/फूस/बांस आदि", "q6": "1-घास/फूस/बांस/लकड़ी/मिट्टी आदि",
+            "q7": "1-आवास", "q8": "1-अच्छी", "q12": "1-पुरुष", "q13": "1-अनुसूचित जाति (SC)",
+            "q14": "1-अपना", "q15": "3", "q16": "2", "q17": "1-नल का पानी उपचारित स्रोत से"
+        };
 
-    dummyPeople.forEach((p, i) => {
-        const bNo = (i+1).toString().padStart(4, '0');
-        dummyData.push({
-            id: 'REC-DUMMY-' + (i+1).toString().padStart(3, '0'),
-            q1: bNo, q2: "0001", line: (i+1).toString().padStart(3, '0'),
-            date: today, status: 'Approved',
-            answers: { ...baseAnswers, q1: bNo, q2: "0001", q3: "0001", q9: "001", q10: p.members, q11: p.name }
+        dummyPeople.forEach((p, i) => {
+            const bNo = (i+1).toString().padStart(4, '0');
+            dummyData.push({
+                id: 'REC-DUMMY-' + (i+1).toString().padStart(3, '0'),
+                q1: bNo, q2: "0001", line: (i+1).toString().padStart(3, '0'),
+                date: today, status: 'Approved',
+                answers: { ...baseAnswers, q1: bNo, q2: "0001", q3: "0001", q9: "001", q10: p.members, q11: p.name }
+            });
         });
-    });
+    }
 
     // Merge manual records with training data (training data comes first)
     // Avoid duplicate IDs if user edited a training record
@@ -231,6 +234,13 @@ function logout() {
  * DYNAMIC SUPERVISOR DATA: Merges real E001 work with 5 other mock enumerators
  */
 function getSupervisorMockData() {
+    const user = getCurrentUser();
+    const authorizedSupervisors = ['s001', 'e001'];
+    
+    if (!authorizedSupervisors.includes(user.id.toLowerCase())) {
+        return {}; // Return empty if not authorized supervisor
+    }
+
     const enumIds = ['e001', 'P002', 'P003', 'P004', 'P005', 'P006'];
     const names = ["जितेंद्र (E001)", "सुनीता शर्मा", "राजेश मीना", "गीता देवी", "विजय सिंह", "संजू वर्मा"];
     const data = {};

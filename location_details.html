@@ -66,6 +66,16 @@
     <script src="app.js"></script>
     <script>
         renderDrawer(); // Add hamburger menu
+        
+        window.onload = function() {
+            const user = getCurrentUser();
+            const isPrefillUser = ['e001', 's001'].includes(user.id.toLowerCase());
+            if (!isPrefillUser) {
+                document.getElementById('expected-buildings').value = "";
+                document.getElementById('expected-houses').value = "";
+            }
+        };
+
         function saveLocationData() {
             const buildings = document.getElementById('expected-buildings').value;
             const houses = document.getElementById('expected-houses').value;

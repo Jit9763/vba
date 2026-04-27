@@ -165,8 +165,38 @@
             if (q.type.startsWith("radio")) return;
             const input = document.getElementById('q-val'); if (input) answers['q' + currentIdx] = input.value;
         }
-        function nextQ() { saveAnswer(); if (currentIdx < 34) { currentIdx++; renderQ(); } else { setFormState('answers', answers); window.location.href = 'house_review.html'; } }
-        function prevQ() { saveAnswer(); if (currentIdx > 4) { currentIdx--; renderQ(); } else { window.location.href = 'house_listing.html'; } }
+        function nextQ() { 
+            saveAnswer(); 
+            
+            // Branching Logic for Q7: If not '1-आवास', skip to Q34 (Mobile Number)
+            if (currentIdx === 7) {
+                const q7Val = answers['q7'];
+                if (q7Val && q7Val !== "1-आवास") {
+                    currentIdx = 34;
+                    renderQ();
+                    return;
+                }
+            }
+
+            if (currentIdx < 34) { currentIdx++; renderQ(); } 
+            else { setFormState('answers', answers); window.location.href = 'house_review.html'; } 
+        }
+        function prevQ() { 
+            saveAnswer(); 
+            
+            // Branching Logic Backwards: If Q7 was not '1-आवास', go back from 34 to 7
+            if (currentIdx === 34) {
+                const q7Val = answers['q7'];
+                if (q7Val && q7Val !== "1-आवास") {
+                    currentIdx = 7;
+                    renderQ();
+                    return;
+                }
+            }
+
+            if (currentIdx > 4) { currentIdx--; renderQ(); } 
+            else { window.location.href = 'house_listing.html'; } 
+        }
         window.onload = renderQ;
     </script>
 </body>
